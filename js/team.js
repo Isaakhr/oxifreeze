@@ -33,15 +33,16 @@
 
     const avatar = make("div", "member__avatar");
     if (member.photo) {
+      avatar.classList.add("has-photo");
       const img = document.createElement("img");
       img.src = member.photo;
-      img.alt = `Foto de ${member.name}`;
+      img.alt = `Foto de ${member.name}, ${member.role}`;
       img.width = 320;
       img.height = 320;
       img.loading = "lazy";
       img.decoding = "async";
       // Si la foto no existe, se regresa a las iniciales
-      img.addEventListener("error", () => { img.remove(); avatar.append(make("span", "member__initials", initials(member.name))); });
+      img.addEventListener("error", () => { img.remove(); avatar.classList.remove("has-photo"); avatar.append(make("span", "member__initials", initials(member.name))); });
       avatar.append(img);
     } else {
       avatar.append(make("span", "member__initials", initials(member.name)));

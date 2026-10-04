@@ -17,11 +17,11 @@ window.OXI_CONFIG = Object.freeze({
   whatsappNumber: "526631015003",
 
   team: [
-    { name: "Luka", role: "CEO · Dirección general", focus: "Estrategia, alianzas y la presentación del proyecto", photo: "" },
-    { name: "Iker", role: "CFO · Finanzas", focus: "Costos, precios, impuestos y el reparto de cada $100", photo: "" },
-    { name: "Isaak", role: "CTO · Tecnología", focus: "Esta web: cotizador, agenda en línea y diseño", photo: "" },
-    { name: "Felipe", role: "COO · Operaciones", focus: "Técnicos, rutas por zona y calidad del servicio", photo: "" },
-    { name: "Camarena", role: "CMO · Marketing", focus: "Redes sociales, WhatsApp y atención al cliente", photo: "" },
+    { name: "Luka", role: "CEO · Dirección general", focus: "Estrategia, alianzas y la presentación del proyecto", photo: "assets/equipo/luka-web.jpg" },
+    { name: "Iker", role: "CFO · Finanzas", focus: "Costos, precios, impuestos y el reparto de cada $100", photo: "assets/equipo/iker-web.jpg" },
+    { name: "Isaak", role: "CTO · Tecnología", focus: "Esta web: cotizador, agenda en línea y diseño", photo: "assets/equipo/isaak-web.jpg" },
+    { name: "Felipe", role: "COO · Operaciones", focus: "Técnicos, rutas por zona y calidad del servicio", photo: "assets/equipo/felipe-web.jpg" },
+    { name: "Camarena", role: "CMO · Marketing", focus: "Redes sociales, WhatsApp y atención al cliente", photo: "assets/equipo/camarena-web.jpg" },
   ],
 });
 } catch (err) {
@@ -1862,15 +1862,16 @@ try {
 
     const avatar = make("div", "member__avatar");
     if (member.photo) {
+      avatar.classList.add("has-photo");
       const img = document.createElement("img");
       img.src = member.photo;
-      img.alt = `Foto de ${member.name}`;
+      img.alt = `Foto de ${member.name}, ${member.role}`;
       img.width = 320;
       img.height = 320;
       img.loading = "lazy";
       img.decoding = "async";
       // Si la foto no existe, se regresa a las iniciales
-      img.addEventListener("error", () => { img.remove(); avatar.append(make("span", "member__initials", initials(member.name))); });
+      img.addEventListener("error", () => { img.remove(); avatar.classList.remove("has-photo"); avatar.append(make("span", "member__initials", initials(member.name))); });
       avatar.append(img);
     } else {
       avatar.append(make("span", "member__initials", initials(member.name)));

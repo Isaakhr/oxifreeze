@@ -4,3 +4,8 @@ Thumbs.db
 *.log
 .claude/settings.local.json
 .claude/
+
+# Fotos del equipo: solo se publican los recortes optimizados (npm run fotos), nunca los originales
+assets/equipo/*
+!assets/equipo/*-web.jpg
+!assets/equipo/LEEME.txt

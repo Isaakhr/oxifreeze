@@ -9,10 +9,10 @@ window.OXI_CONFIG = Object.freeze({
   whatsappNumber: "526631015003",
 
   team: [
-    { name: "Luka", role: "CEO · Dirección general", focus: "Estrategia, alianzas y la presentación del proyecto", photo: "" },
-    { name: "Iker", role: "CFO · Finanzas", focus: "Costos, precios, impuestos y el reparto de cada $100", photo: "" },
-    { name: "Isaak", role: "CTO · Tecnología", focus: "Esta web: cotizador, agenda en línea y diseño", photo: "" },
-    { name: "Felipe", role: "COO · Operaciones", focus: "Técnicos, rutas por zona y calidad del servicio", photo: "" },
-    { name: "Camarena", role: "CMO · Marketing", focus: "Redes sociales, WhatsApp y atención al cliente", photo: "" },
+    { name: "Luka", role: "CEO · Dirección general", focus: "Estrategia, alianzas y la presentación del proyecto", photo: "assets/equipo/luka-web.jpg" },
+    { name: "Iker", role: "CFO · Finanzas", focus: "Costos, precios, impuestos y el reparto de cada $100", photo: "assets/equipo/iker-web.jpg" },
+    { name: "Isaak", role: "CTO · Tecnología", focus: "Esta web: cotizador, agenda en línea y diseño", photo: "assets/equipo/isaak-web.jpg" },
+    { name: "Felipe", role: "COO · Operaciones", focus: "Técnicos, rutas por zona y calidad del servicio", photo: "assets/equipo/felipe-web.jpg" },
+    { name: "Camarena", role: "CMO · Marketing", focus: "Redes sociales, WhatsApp y atención al cliente", photo: "assets/equipo/camarena-web.jpg" },
   ],
 });
