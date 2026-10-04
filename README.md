@@ -22,7 +22,14 @@ Sitio estático (HTML + CSS + JavaScript, sin backend ni dependencias) publicado
 - **Horarios de la agenda**: `SCHEDULE` en `js/booking.js`.
 - **Textos**: `index.html`.
 
-Después de cambiar precios u horarios, correr las pruebas:
+**Importante:** la página carga dos paquetes (`css/oxifreeze.bundle.css` y `js/oxifreeze.bundle.js`)
+para abrir más rápido en celular. Después de editar cualquier archivo de `css/` o `js/`:
+
+```bash
+npm run build
+```
+
+y luego las pruebas (fallan si olvidaste el build o si un cambio rompe precios u horarios):
 
 ```bash
 npm test
@@ -41,12 +48,12 @@ y abrir <http://localhost:5173>.
 ```
 index.html        página principal (todas las secciones)
 qr.html           QR imprimible
-css/              estilos por sección (styles = base y hero)
-js/               un archivo por sección; pricing.js, booking.js y whatsapp.js son lógica pura con pruebas
+css/              estilos por sección (styles = base y hero) + oxifreeze.bundle.css generado
+js/               un archivo por sección + oxifreeze.bundle.js generado; pricing, booking y whatsapp son lógica pura con pruebas
 vendor/qrcode.js  generador de QR (Kazuhiko Arase, licencia MIT)
 assets/           logo, favicon, imagen para compartir (og.png)
 tests/            pruebas con node:test
-tools/            plantillas de imágenes y script de capturas (no se usan en el sitio)
+tools/            build.mjs (paquetes), shot.mjs (capturas) y plantillas de imágenes
 canary/           evidencia de cada fase (capturas y reportes)
 ```
 
