@@ -111,7 +111,7 @@ Punto de partida (Lighthouse local, celular): Performance 32, Accessibility 97. 
 - [x] Cotizador + agenda en un solo flujo ("Cotiza y agenda"): el recibo tiene "Agendar esta cotización", el formulario ya no pide servicio (lo toma de la cotización), un solo folio con precio + cita; el total viaja a WhatsApp, Google Calendar y .ics; duración de la cita según servicio y equipos
 - [x] "Cómo transformamos Tijuana" fusionada en "Nuestra economía" como bloque final "Lo que Oxifreeze le deja a Tijuana" (4 contadores con fuentes); se quitaron pilares y calculadora
 - [x] Diagrama más simple (etiquetas de 1–2 palabras, más grandes) + recorrido "Sigue un pago" de 7 pasos con montos reales de la cotización (reparto exacto: suma = total)
-- [x] Script de fotos del equipo (`npm run fotos`) — pendiente que el equipo deje las fotos en `assets/equipo/`
+- [x] Fotos del equipo (2026-10-04): recortes 480 px hechos a mano (cabeza y hombros, sin otras personas), publicados; originales fuera del repo. Script `npm run fotos` para futuras fotos
 - [x] Pruebas: `npm test` 25/25 (nuevas: reparto del pago, servicio/duración desde cotización, total en evento y mensaje)
 
 **Canary PASS:** flujo cotizar → agendar de punta a punta con un solo folio y total correcto; recorrido de pago completo; navegación y presentación sin regresiones.
