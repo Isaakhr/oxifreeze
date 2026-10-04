@@ -72,7 +72,9 @@ try {
   const shots = selectors.length ? selectors : [null];
   for (const [i, sel] of shots.entries()) {
     if (sel) {
-      const ok = await evaluate(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return false;
+      // Usa el salto del propio sitio (corrige alturas estimadas de content-visibility) si existe.
+      const ok = await evaluate(`(async () => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return false;
+        if (window.OxiScrollTo) { await window.OxiScrollTo(el, { smooth: false }); return true; }
         let y = 0, n = el; while (n) { y += n.offsetTop; n = n.offsetParent; }
         window.scrollTo({ top: y - 90, behavior: "instant" }); return true; })()`);
       if (!ok) { console.error(`No existe ${sel}`); continue; }

@@ -82,8 +82,27 @@ Fuentes usadas: U.S. DOE “Maintaining Your Air Conditioner” (5–15 % con fi
 Pendiente para Fase 6: `og:image` y `og:url` deben ser URL absolutas (WhatsApp no lee rutas relativas) → se ponen al conocer la URL de GitHub Pages. Pantalla completa no se pudo activar dentro del panel de vista previa (lo bloquea el panel); se valida en navegador normal.
 
 ## Fase 6 — Pulido, Lighthouse ≥ 90, deploy GitHub Pages
+
+- [x] WhatsApp real (52 663 101 5003) y roles: CEO Luka · CFO Iker · CTO Isaak · COO Felipe · CMO Camarena
+- [x] Accesibilidad: contraste AA corregido (etiquetas, estados de horario, botones de WhatsApp) → 100
+- [x] Movimiento reducido verificado por emulación: sin partículas, sin apariciones, sin estela, 0 animaciones CSS, sin scroll suave
+- [x] Rendimiento: paquetes únicos de CSS/JS (`npm run build`, con prueba de frescura), fuentes propias (OFL), JS arranca tras el primer pintado y por módulos cediendo el control, content-visibility con saltos de ancla corregidos, sin backdrop-filter sobre el canvas, capas del modo calor fuera del DOM en frío
+- [x] Deploy: repo público https://github.com/Isaakhr/oxifreeze → GitHub Pages
+- [x] Open Graph con URL absolutas; QR público decodificado = https://isaakhr.github.io/oxifreeze/
+- [x] README con uso, edición y mantenimiento
+
+**URL final:** https://isaakhr.github.io/oxifreeze/ · **QR:** https://isaakhr.github.io/oxifreeze/qr.html
+
+**Lighthouse — PageSpeed Insights (servidores de Google), 2026-10-03:**
+| | Performance | Accessibility | Best Practices | SEO | FCP | LCP | TBT | CLS |
+|---|---|---|---|---|---|---|---|---|
+| Celular | **99** | **100** | 100 | 100 | 1.5 s | 1.6 s | 0 ms | 0.022 |
+| Escritorio | **100** | **100** | 100 | 100 | 0.3 s | 0.4 s | 0 ms | 0.009 |
+
+Punto de partida (Lighthouse local, celular): Performance 32, Accessibility 97. Las corridas locales de Lighthouse en esta compu varían mucho (69–96 en celular con el mismo código) por carga del sistema; la referencia es PageSpeed Insights.
+
 **Canary PASS:** URL pública abre en un celular real.
-**Estado:** [ ] pendiente
+**Estado:** [~] PASS técnico (2026-10-03) — URL pública 200, 0 recursos rotos, 0 errores de consola, saltos de menú exactos en 375/1920 (y con #ancla en la URL), presentación 13/13, QR verificado. **Falta solo la prueba en un celular real del equipo** (escanear el QR, cotizar, enviar a WhatsApp, agendar, abrir Google Calendar y probar pantalla completa con P en la compu de la expo). Evidencia: `canary/fase6/`.
 
 ---
 

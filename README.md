@@ -4,7 +4,13 @@ Proyecto escolar de Economía (“Crea una empresa que transforme tu comunidad�
 **Empresa ficticia**: instalación y mantenimiento de aire acondicionado en Tijuana, B.C.
 Equipo: Luka, Iker, Isaak, Felipe y Camarena.
 
-Sitio estático (HTML + CSS + JavaScript, sin backend ni dependencias) publicado en GitHub Pages.
+Sitio estático (HTML + CSS + JavaScript, sin backend ni dependencias) publicado en GitHub Pages:
+
+- **Sitio:** https://isaakhr.github.io/oxifreeze/
+- **QR para imprimir:** https://isaakhr.github.io/oxifreeze/qr.html
+- PageSpeed Insights: celular 99 / 100 / 100 / 100 · escritorio 100 / 100 / 100 / 100
+
+Para publicar cambios: `npm run build`, `npm test`, commit y `git push` (GitHub Pages se actualiza en ~1 minuto).
 
 ## Para la exposición
 
