@@ -4,7 +4,7 @@
 "use strict";
 const MODULES = [
 /* ---- js/config.js ---- */
-() => {
+["js/config.js", () => {
 try {
 /* Oxifreeze — configuración editable (todo lo que el equipo puede cambiar sin tocar código).
 
@@ -27,10 +27,10 @@ window.OXI_CONFIG = Object.freeze({
 } catch (err) {
   console.error("[oxifreeze] Falló js/config.js", err);
 }
-},
+}],
 
 /* ---- js/pricing.js ---- */
-() => {
+["js/pricing.js", () => {
 try {
 /* Oxifreeze — motor de precios (fuente única de verdad para tarjetas y cotizador).
    Precios ESTIMADOS de una empresa ficticia, en MXN con IVA incluido
@@ -163,10 +163,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/pricing.js", err);
 }
-},
+}],
 
 /* ---- js/whatsapp.js ---- */
-() => {
+["js/whatsapp.js", () => {
 try {
 /* Oxifreeze — arma mensajes de WhatsApp (link wa.me con texto prellenado). */
 (function (root) {
@@ -216,10 +216,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/whatsapp.js", err);
 }
-},
+}],
 
 /* ---- js/main.js ---- */
-() => {
+["js/main.js", () => {
 try {
 /* Oxifreeze — navegación: estado al hacer scroll, menú móvil y link activo. */
 (() => {
@@ -264,14 +264,76 @@ try {
     { rootMargin: "-45% 0px -50% 0px" }
   );
   document.querySelectorAll("main > section[id]").forEach((s) => observer.observe(s));
+
+  /* ---------- Saltos a secciones (#ancla) ----------
+     Con content-visibility las secciones lejanas tienen una altura estimada; al ir llegando se
+     miden y cambian de tamaño, así que el salto puede quedar corrido. Después de cada salto se
+     revisa dónde quedó la sección y se corrige (hasta 3 veces). */
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const STILL_FRAMES = 6;          // ~100 ms sin moverse = el scroll terminó
+  const SCROLL_TIMEOUT_MS = 2500;
+  const MAX_FIXES = 3;
+  const TOLERANCE_PX = 4;
+
+  const waitScrollEnd = () => new Promise((resolve) => {
+    const start = performance.now();
+    let last = -1;
+    let still = 0;
+    const tick = () => {
+      const y = window.scrollY;
+      still = y === last ? still + 1 : 0;
+      last = y;
+      if (still >= STILL_FRAMES || performance.now() - start > SCROLL_TIMEOUT_MS) resolve();
+      else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+
+  const scrollPadding = () => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+
+  async function scrollToSection(el, { smooth = true } = {}) {
+    el.scrollIntoView({ behavior: smooth && !reduceMotion.matches ? "smooth" : "auto", block: "start" });
+    for (let i = 0; i < MAX_FIXES; i++) {
+      await waitScrollEnd();
+      const delta = el.getBoundingClientRect().top - scrollPadding();
+      if (Math.abs(delta) <= TOLERANCE_PX) break;
+      window.scrollBy({ top: delta, behavior: "instant" });
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const id = decodeURIComponent(a.getAttribute("href").slice(1));
+    const el = id && document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    history.pushState(null, "", `#${id}`);
+    scrollToSection(el);
+    // El enlace "Saltar al contenido" también debe mover el foco del teclado
+    if (a.classList.contains("skip-link")) {
+      el.setAttribute("tabindex", "-1");
+      el.focus({ preventScroll: true });
+    }
+  });
+
+  // Si la página abrió con #ancla (por ejemplo desde un link compartido), se corrige igual.
+  const fixInitialHash = () => {
+    const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (el) scrollToSection(el, { smooth: false });
+  };
+  if (document.readyState === "complete") fixInitialHash();
+  else window.addEventListener("load", fixInitialHash, { once: true });
+
+  window.OxiScrollTo = scrollToSection;
 })();
 } catch (err) {
   console.error("[oxifreeze] Falló js/main.js", err);
 }
-},
+}],
 
 /* ---- js/hero.js ---- */
-() => {
+["js/hero.js", () => {
 try {
 /* Oxifreeze — hero: el scroll baja la temperatura de 38 °C a 22 °C
    y las partículas pasan de brasas que suben a aire frío que fluye. */
@@ -466,10 +528,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/hero.js", err);
 }
-},
+}],
 
 /* ---- js/services.js ---- */
-() => {
+["js/services.js", () => {
 try {
 /* Oxifreeze — tarjetas de servicios. Los precios "desde" salen de pricing.js
    para que nunca se contradigan con el cotizador. */
@@ -538,10 +600,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/services.js", err);
 }
-},
+}],
 
 /* ---- js/quoter.js ---- */
-() => {
+["js/quoter.js", () => {
 try {
 /* Oxifreeze — cotizador interactivo: calcula en vivo y arma el mensaje de WhatsApp.
    Todo el HTML que se inyecta sale de constantes propias o de números ya validados. */
@@ -626,11 +688,18 @@ try {
     els.barTotal.textContent = money(v);
   }
 
+  const BUMP_KEYFRAMES = [{ transform: "scale(1)" }, { transform: "scale(1.06)", offset: 0.4 }, { transform: "scale(1)" }];
+  let isFirstRender = true;
+
   function animateTotal(to) {
     cancelAnimationFrame(tweenId);
     const from = shownTotal;
     clearTimeout(fallbackId);
-    if (reduceMotion.matches || document.hidden || from === to) return paintTotal(to);
+    // Al cargar la página el total aparece directo (sin animación que trabaje mientras arranca).
+    if (isFirstRender || reduceMotion.matches || document.hidden || from === to) {
+      isFirstRender = false;
+      return paintTotal(to);
+    }
     // Si el navegador pausa requestAnimationFrame (pestaña en segundo plano), el total final se pinta igual.
     fallbackId = setTimeout(() => { cancelAnimationFrame(tweenId); paintTotal(to); }, TWEEN_MS + 150);
     const start = performance.now();
@@ -641,9 +710,8 @@ try {
       if (t < 1) tweenId = requestAnimationFrame(tick);
     };
     tweenId = requestAnimationFrame(tick);
-    els.total.classList.remove("is-bump");
-    void els.total.offsetWidth; // reinicia la animación CSS
-    els.total.classList.add("is-bump");
+    // Web Animations: reinicia el "salto" sin forzar un recálculo de layout de la página
+    els.total.animate?.(BUMP_KEYFRAMES, { duration: 450, easing: "cubic-bezier(.22, 1, .36, 1)" });
   }
 
   const line = (label, value, cls = "") =>
@@ -722,7 +790,9 @@ try {
     form.querySelector(`input[name="equipo"][value="${equipo}"]`).checked = true;
     renderTonsChips(equipo);
     render();
-    document.getElementById("cotizador").scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });
+    const target = document.getElementById("cotizador");
+    if (window.OxiScrollTo) window.OxiScrollTo(target);
+    else target.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });
   });
 
   /* ---------- Barra flotante del total (móvil) ---------- */
@@ -743,10 +813,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/quoter.js", err);
 }
-},
+}],
 
 /* ---- js/booking.js ---- */
-() => {
+["js/booking.js", () => {
 try {
 /* Oxifreeze — lógica de la agenda (sin DOM): días, horarios, validación,
    folio, link de Google Calendar y archivo .ics. Todo corre en el cliente. */
@@ -942,10 +1012,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/booking.js", err);
 }
-},
+}],
 
 /* ---- js/agenda.js ---- */
-() => {
+["js/agenda.js", () => {
 try {
 /* Oxifreeze — agenda en línea: calendario de 14 días, horarios, formulario y
    pantalla de éxito con folio, WhatsApp, Google Calendar y .ics. Sin backend.
@@ -1203,10 +1273,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/agenda.js", err);
 }
-},
+}],
 
 /* ---- js/impact.js ---- */
-() => {
+["js/impact.js", () => {
 try {
 /* Oxifreeze — impacto: contadores animados y calculadora de ahorro en CFE. */
 (() => {
@@ -1275,10 +1345,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/impact.js", err);
 }
-},
+}],
 
 /* ---- js/economy.js ---- */
-() => {
+["js/economy.js", () => {
 try {
 /* Oxifreeze — "Nuestra economía": flujo circular interactivo (SVG generado desde datos),
    pestañas de agentes y reparto de cada $100. */
@@ -1465,10 +1535,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/economy.js", err);
 }
-},
+}],
 
 /* ---- js/qr.js ---- */
-() => {
+["js/qr.js", () => {
 try {
 /* Oxifreeze — QR de la URL del sitio. La librería (vendor/qrcode.js, MIT) se carga bajo demanda. */
 (function (root) {
@@ -1517,10 +1587,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/qr.js", err);
 }
-},
+}],
 
 /* ---- js/contact.js ---- */
-() => {
+["js/contact.js", () => {
 try {
 /* Oxifreeze — contacto: links generales de WhatsApp, zonas de cobertura y QR del footer. */
 (() => {
@@ -1567,10 +1637,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/contact.js", err);
 }
-},
+}],
 
 /* ---- js/team.js ---- */
-() => {
+["js/team.js", () => {
 try {
 /* Oxifreeze — tarjetas del equipo, generadas desde OXI_CONFIG.team.
    Se construyen con nodos del DOM (textContent), sin insertar HTML. */
@@ -1633,10 +1703,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/team.js", err);
 }
-},
+}],
 
 /* ---- js/climate.js ---- */
-() => {
+["js/climate.js", () => {
 try {
 /* Oxifreeze — interruptor calor / frío: la demo visual del producto.
    Modo calor = "Tijuana sin Oxifreeze": toda la página se tiñe de naranja sofocante.
@@ -1697,10 +1767,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/climate.js", err);
 }
-},
+}],
 
 /* ---- js/present.js ---- */
-() => {
+["js/present.js", () => {
 try {
 /* Oxifreeze — modo presentación: la misma página se vuelve diapositivas a pantalla completa.
    Tecla P (o el botón) para entrar · → / PageDown / Espacio = siguiente · ← / PageUp = anterior
@@ -1840,10 +1910,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/present.js", err);
 }
-},
+}],
 
 /* ---- js/fx.js ---- */
-() => {
+["js/fx.js", () => {
 try {
 /* Oxifreeze — micro-interacciones: aparición al hacer scroll y estela de escarcha del cursor.
    Nada de esto corre con prefers-reduced-motion; la estela solo en escritorio con mouse. */
@@ -1985,16 +2055,20 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/fx.js", err);
 }
-},
+}],
 
 ];
 const yieldToMain = () =>
   (globalThis.scheduler && typeof scheduler.yield === "function")
     ? scheduler.yield()
     : new Promise((resolve) => setTimeout(resolve, 0));
+// Tiempo de arranque de cada módulo (ms), para diagnosticar rendimiento: OxiBootTimes en la consola.
+const times = (window.OxiBootTimes = {});
 async function bootOxifreeze() {
-  for (const run of MODULES) {
+  for (const [name, run] of MODULES) {
+    const t0 = performance.now();
     run();
+    times[name] = Math.round(performance.now() - t0);
     // En segundo plano los timers se frenan (~1/s): ahí conviene terminar de corrido.
     if (!document.hidden) await yieldToMain();
   }

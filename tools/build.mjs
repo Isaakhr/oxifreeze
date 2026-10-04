@@ -30,7 +30,7 @@ const HEADER = (kind) =>
 // (igual que cuando eran <script> separados).
 // Cada archivo queda como una función de la lista MODULES; se ejecutan en tareas separadas.
 const wrapJs = (f, src) =>
-  `() => {\ntry {\n${src}\n} catch (err) {\n  console.error("[oxifreeze] Falló ${f}", err);\n}\n},\n`;
+  `["${f}", () => {\ntry {\n${src}\n} catch (err) {\n  console.error("[oxifreeze] Falló ${f}", err);\n}\n}],\n`;
 
 async function concat(files, wrap) {
   const parts = await Promise.all(files.map(async (f) => {
@@ -53,9 +53,13 @@ const yieldToMain = () =>
   (globalThis.scheduler && typeof scheduler.yield === "function")
     ? scheduler.yield()
     : new Promise((resolve) => setTimeout(resolve, 0));
+// Tiempo de arranque de cada módulo (ms), para diagnosticar rendimiento: OxiBootTimes en la consola.
+const times = (window.OxiBootTimes = {});
 async function bootOxifreeze() {
-  for (const run of MODULES) {
+  for (const [name, run] of MODULES) {
+    const t0 = performance.now();
     run();
+    times[name] = Math.round(performance.now() - t0);
     // En segundo plano los timers se frenan (~1/s): ahí conviene terminar de corrido.
     if (!document.hidden) await yieldToMain();
   }

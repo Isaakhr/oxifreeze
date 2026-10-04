@@ -81,11 +81,18 @@
     els.barTotal.textContent = money(v);
   }
 
+  const BUMP_KEYFRAMES = [{ transform: "scale(1)" }, { transform: "scale(1.06)", offset: 0.4 }, { transform: "scale(1)" }];
+  let isFirstRender = true;
+
   function animateTotal(to) {
     cancelAnimationFrame(tweenId);
     const from = shownTotal;
     clearTimeout(fallbackId);
-    if (reduceMotion.matches || document.hidden || from === to) return paintTotal(to);
+    // Al cargar la página el total aparece directo (sin animación que trabaje mientras arranca).
+    if (isFirstRender || reduceMotion.matches || document.hidden || from === to) {
+      isFirstRender = false;
+      return paintTotal(to);
+    }
     // Si el navegador pausa requestAnimationFrame (pestaña en segundo plano), el total final se pinta igual.
     fallbackId = setTimeout(() => { cancelAnimationFrame(tweenId); paintTotal(to); }, TWEEN_MS + 150);
     const start = performance.now();
@@ -96,9 +103,8 @@
       if (t < 1) tweenId = requestAnimationFrame(tick);
     };
     tweenId = requestAnimationFrame(tick);
-    els.total.classList.remove("is-bump");
-    void els.total.offsetWidth; // reinicia la animación CSS
-    els.total.classList.add("is-bump");
+    // Web Animations: reinicia el "salto" sin forzar un recálculo de layout de la página
+    els.total.animate?.(BUMP_KEYFRAMES, { duration: 450, easing: "cubic-bezier(.22, 1, .36, 1)" });
   }
 
   const line = (label, value, cls = "") =>
@@ -177,7 +183,9 @@
     form.querySelector(`input[name="equipo"][value="${equipo}"]`).checked = true;
     renderTonsChips(equipo);
     render();
-    document.getElementById("cotizador").scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });
+    const target = document.getElementById("cotizador");
+    if (window.OxiScrollTo) window.OxiScrollTo(target);
+    else target.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth" });
   });
 
   /* ---------- Barra flotante del total (móvil) ---------- */

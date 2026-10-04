@@ -17,6 +17,7 @@ const args = process.argv.slice(2);
 const flags = args.filter((a) => a.startsWith("--"));
 const [url, outBase, size = "1920x1080", ...selectors] = args.filter((a) => !a.startsWith("--"));
 const reducedMotion = flags.includes("--reduced-motion");
+const cpuRate = Number(flags.find((f) => f.startsWith("--cpu="))?.slice(6) || 1); // --cpu=4 ≈ celular
 const evalExpr = flags.find((f) => f.startsWith("--eval="))?.slice(7);
 if (!url || !outBase) {
   console.error("Uso: node tools/shot.mjs <url> <salida> <ancho>x<alto> [selectores…]");
@@ -59,6 +60,7 @@ try {
     (await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true })).result.value;
 
   await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 768 });
+  if (cpuRate > 1) await send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
   if (reducedMotion) {
     await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   }

@@ -328,7 +328,16 @@ ul { margin: 0; padding: 0; list-style: none; }
 /* ==========================================================================
    Secciones genéricas
    ========================================================================== */
-.section { padding-block: clamp(72px, 10vw, 140px); }
+.section {
+  padding-block: clamp(72px, 10vw, 140px);
+  /* El navegador no calcula ni pinta las secciones lejos de la pantalla hasta que te acercas
+     (el primer layout de toda la página era la tarea más pesada en celular). "auto" recuerda la
+     altura real ya medida. Los saltos de ancla se corrigen en main.js. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1600px;
+}
+/* El modo presentación necesita las alturas reales para calcular cada diapositiva. */
+html.is-presenting .section { content-visibility: visible; }
 .section--alt { background: var(--ice-100); }
 .kicker {
   font-size: .8rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;

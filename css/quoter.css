@@ -199,8 +199,6 @@
   font-variant-numeric: tabular-nums;
   background: linear-gradient(135deg, var(--blue-600), var(--cyan-400)); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.receipt__total strong.is-bump { animation: bump .45s var(--ease-out); }
-@keyframes bump { 40% { transform: scale(1.06); } }
 
 .receipt__meta { margin-top: 6px; text-align: right; font-size: .82rem; color: var(--text-muted); }
 .receipt__warn {
