@@ -1,5 +1,8 @@
 /* ARCHIVO GENERADO por tools/build.mjs — no lo edites a mano.
    Edita los JS de js/ fuente y corre: npm run build */
+(() => {
+"use strict";
+function bootOxifreeze() {
 /* ---- js/config.js ---- */
 try {
 /* Oxifreeze — configuración editable (todo lo que el equipo puede cambiar sin tocar código).
@@ -1946,3 +1949,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/fx.js", err);
 }
+
+}
+// rAF → setTimeout: corre justo después de que el navegador pintó el primer cuadro.
+const start = () => requestAnimationFrame(() => setTimeout(bootOxifreeze, 0));
+if (document.visibilityState === "hidden") setTimeout(bootOxifreeze, 0); // pestaña en segundo plano: rAF no corre
+else start();
+})();

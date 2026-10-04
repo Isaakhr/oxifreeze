@@ -31,18 +31,32 @@ const HEADER = (kind) =>
 const wrapJs = (f, src) =>
   `try {\n${src}\n} catch (err) {\n  console.error("[oxifreeze] Falló ${f}", err);\n}\n`;
 
-async function concat(files, kind, wrap) {
+async function concat(files, wrap) {
   const parts = await Promise.all(files.map(async (f) => {
     const src = (await readFile(join(ROOT, f), "utf8")).replace(/\r\n/g, "\n").trimEnd();
     return `/* ---- ${f} ---- */\n${wrap ? wrap(f, src) : `${src}\n`}`;
   }));
-  return HEADER(kind) + parts.join("\n");
+  return parts.join("\n");
 }
+
+// Todo el JS arranca DESPUÉS del primer pintado: así el hero (HTML + CSS) se ve de inmediato
+// y el trabajo de JS (armar secciones, medir el layout) no retrasa lo primero que ve el usuario.
+const bootJs = (body) => `(() => {
+"use strict";
+function bootOxifreeze() {
+${body}
+}
+// rAF → setTimeout: corre justo después de que el navegador pintó el primer cuadro.
+const start = () => requestAnimationFrame(() => setTimeout(bootOxifreeze, 0));
+if (document.visibilityState === "hidden") setTimeout(bootOxifreeze, 0); // pestaña en segundo plano: rAF no corre
+else start();
+})();
+`;
 
 export async function buildBundles() {
   return {
-    css: await concat(CSS_FILES, "CSS de css/"),
-    js: await concat(JS_FILES, "JS de js/", wrapJs),
+    css: HEADER("CSS de css/") + await concat(CSS_FILES),
+    js: HEADER("JS de js/") + bootJs(await concat(JS_FILES, wrapJs)),
   };
 }
 
