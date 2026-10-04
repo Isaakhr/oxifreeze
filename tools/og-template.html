@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<title>OG Oxifreeze</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@700&family=Unbounded:wght@800&display=block">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative; font-family: "Manrope", sans-serif; color: #fff;
+    background:
+      radial-gradient(60% 80% at 100% 0%, rgba(34, 211, 238, .45), transparent 65%),
+      radial-gradient(50% 70% at 0% 100%, rgba(30, 123, 255, .4), transparent 65%),
+      #030b1c;
+  }
+  .brand { position: absolute; left: 72px; top: 64px; display: flex; align-items: center; gap: 18px; font: 800 44px/1 "Unbounded"; letter-spacing: -1.5px; }
+  .brand svg { width: 72px; height: 72px; }
+  .brand b { font-weight: 800; background: linear-gradient(135deg, #7df9ff, #1e7bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 { position: absolute; left: 72px; top: 168px; margin: 0; font: 800 92px/1 "Unbounded"; letter-spacing: -4px; }
+  h1 .hot { background: linear-gradient(135deg, #ffb347, #e8341c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 .cool { background: linear-gradient(135deg, #fff, #7df9ff 40%, #1e7bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { position: absolute; left: 72px; bottom: 64px; font-size: 30px; color: #c6ecff; }
+  .temp { position: absolute; right: 72px; top: 250px; display: flex; align-items: baseline; gap: 14px; font: 800 120px/1 "Unbounded"; letter-spacing: -6px; }
+  .temp s { font-size: 60px; color: #ff7a3d; text-decoration-thickness: 6px; letter-spacing: -2px; }
+  .temp span { background: linear-gradient(135deg, #fff, #7df9ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <svg viewBox="0 0 64 64">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7DF9FF"/><stop offset="1" stop-color="#1E7BFF"/></linearGradient></defs>
+      <circle cx="32" cy="32" r="27" fill="none" stroke="url(#g)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="148 21.6" transform="rotate(-62 32 32)"/>
+      <g stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" fill="none">
+        <path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(60 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(120 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(180 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(240 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(300 32 32)"/>
+      </g>
+      <circle cx="54.5" cy="12.5" r="3" fill="#7DF9FF"/>
+    </svg>
+    <span>Oxi<b>freeze</b></span>
+  </div>
+  <h1>Tijuana se<br><span class="hot">calienta.</span><br>Tú <span class="cool">no.</span></h1>
+  <p class="sub">Aire acondicionado en Tijuana · Cotiza en 30 segundos</p>
+  <div class="temp"><s>38°</s><span>22°</span></div>
+</body>
+</html>

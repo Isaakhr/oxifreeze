@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Oxifreeze">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7DF9FF"/>
+      <stop offset="1" stop-color="#1E7BFF"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="url(#g)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="148 21.6" transform="rotate(-62 32 32)"/>
+  <g stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" fill="none">
+    <g id="s"><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2"/></g>
+    <use href="#s" transform="rotate(60 32 32)"/>
+    <use href="#s" transform="rotate(120 32 32)"/>
+    <use href="#s" transform="rotate(180 32 32)"/>
+    <use href="#s" transform="rotate(240 32 32)"/>
+    <use href="#s" transform="rotate(300 32 32)"/>
+  </g>
+  <circle cx="54.5" cy="12.5" r="3" fill="#7DF9FF"/>
+</svg>

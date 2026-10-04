@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oxifreeze — Código QR</title>
+  <meta name="description" content="Código QR de la página de Oxifreeze para imprimir en la mampara.">
+  <meta name="theme-color" content="#061631">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@700;800&display=swap">
+  <style>
+    :root { --ink: #061631; --ink-2: #030b1c; --cyan: #7df9ff; --blue: #1e7bff; --muted: #9fb8d8; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+      font-family: "Manrope", system-ui, sans-serif; color: #fff;
+      background: radial-gradient(70% 50% at 80% 0%, rgba(34, 211, 238, .25), transparent 70%), var(--ink-2);
+    }
+    .sheet {
+      width: min(560px, 100%); display: grid; justify-items: center; gap: 18px; text-align: center;
+      padding: clamp(24px, 6vw, 48px); border-radius: 32px;
+      background: linear-gradient(160deg, rgba(125, 249, 255, .12), rgba(30, 123, 255, .08));
+      border: 1px solid rgba(125, 249, 255, .3);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; font: 800 1.8rem/1 "Unbounded", sans-serif; letter-spacing: -0.03em; }
+    .brand svg { width: 52px; height: 52px; }
+    .brand span span { background: linear-gradient(135deg, var(--cyan), var(--blue)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    h1 { margin: 0; font: 800 clamp(1.8rem, 7vw, 2.8rem)/1.05 "Unbounded", sans-serif; letter-spacing: -0.04em; }
+    h1 em { font-style: normal; color: var(--cyan); }
+    .qr { width: min(380px, 80vw); aspect-ratio: 1; padding: 22px; border-radius: 28px; background: #fff; box-shadow: 0 0 0 8px rgba(125, 249, 255, .3), 0 30px 80px -20px rgba(34, 211, 238, .6); }
+    .qr svg { display: block; width: 100%; height: 100%; }
+    .url { font: 700 1.05rem "Manrope", sans-serif; color: var(--cyan); word-break: break-all; }
+    .steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; color: var(--muted); font-weight: 600; }
+    .note { font-size: .82rem; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .btn { min-height: 46px; padding: 12px 20px; border-radius: 999px; border: 1.5px solid rgba(125, 249, 255, .4); background: transparent; color: #fff; font: 700 1rem "Manrope", sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn--primary { border-color: transparent; color: var(--ink-2); background: linear-gradient(135deg, #b9fbff, #22d3ee); }
+    .btn:hover { border-color: var(--cyan); }
+    form { display: flex; gap: 8px; width: 100%; }
+    form input { flex: 1; min-width: 0; min-height: 44px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid rgba(125, 249, 255, .3); background: rgba(3, 11, 28, .6); color: #fff; font: 600 .9rem "Manrope", sans-serif; }
+    form label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    :focus-visible { outline: 3px solid #22d3ee; outline-offset: 3px; }
+    @media print {
+      @page { size: letter; margin: 14mm; }
+      body { background: #fff; color: var(--ink); padding: 0; }
+      .sheet { border: 3px solid var(--ink); background: #fff; width: 100%; }
+      .brand span span, h1 em, .url { color: var(--blue); -webkit-text-fill-color: var(--blue); }
+      .qr { width: 120mm; box-shadow: none; border: 2px solid var(--ink); }
+      .steps, .note { color: #334; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <div class="brand" aria-label="Oxifreeze">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7DF9FF"/><stop offset="1" stop-color="#1E7BFF"/></linearGradient></defs>
+        <circle cx="32" cy="32" r="27" fill="none" stroke="url(#g)" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="148 21.6" transform="rotate(-62 32 32)"/>
+        <g stroke="url(#g)" stroke-width="3.2" stroke-linecap="round" fill="none">
+          <path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(60 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(120 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(180 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(240 32 32)"/><path d="M32 32V16M32 21.5l-4.2-4.2M32 21.5l4.2-4.2" transform="rotate(300 32 32)"/>
+        </g>
+        <circle cx="54.5" cy="12.5" r="3" fill="#7DF9FF"/>
+      </svg>
+      <span>Oxi<span>freeze</span></span>
+    </div>
+    <h1>Escanea y <em>cotiza</em> tu aire en 30 segundos</h1>
+    <div class="qr" data-qr></div>
+    <p class="url" data-qr-url></p>
+    <ol class="steps">
+      <li>1. Abre la cámara de tu celular</li>
+      <li>2. Apunta al código</li>
+      <li>3. Toca el enlace que aparece</li>
+    </ol>
+    <p class="note">Proyecto escolar — empresa ficticia. Tijuana, B.C.</p>
+
+    <div class="actions no-print">
+      <button class="btn btn--primary" type="button" data-print>Imprimir</button>
+      <button class="btn" type="button" data-png>Descargar PNG</button>
+      <a class="btn" href="./">Volver a la página</a>
+    </div>
+    <form class="no-print" data-url-form>
+      <label for="qr-url">URL del QR</label>
+      <input id="qr-url" name="url" type="url" inputmode="url" placeholder="https://…" required>
+      <button class="btn" type="submit">Usar esta URL</button>
+    </form>
+  </main>
+
+  <script src="vendor/qrcode.js"></script>
+  <script src="js/qr.js"></script>
+  <script>
+    (() => {
+      "use strict";
+      const box = document.querySelector("[data-qr]");
+      const url = window.OxiQR.siteUrl();
+      document.querySelector("[data-qr-url]").textContent = url;
+      document.querySelector("#qr-url").value = url;
+      window.OxiQR.render(box, url).catch((err) => {
+        box.textContent = "No se pudo generar el QR.";
+        console.error("[qr]", err);
+      });
+
+      document.querySelector("[data-print]").addEventListener("click", () => window.print());
+
+      // PNG de 1600 px para imprenta: se dibuja el SVG en un canvas
+      document.querySelector("[data-png]").addEventListener("click", () => {
+        const SIZE = 1600;
+        const PAD = 80;
+        const svg = box.querySelector("svg");
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement("canvas");
+          c.width = c.height = SIZE;
+          const ctx = c.getContext("2d");
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, SIZE, SIZE);
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, PAD, PAD, SIZE - PAD * 2, SIZE - PAD * 2);
+          const a = document.createElement("a");
+          a.download = "oxifreeze-qr.png";
+          a.href = c.toDataURL("image/png");
+          a.click();
+        };
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+      });
+
+      document.querySelector("[data-url-form]").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const value = e.target.elements.url.value.trim();
+        if (!/^https?:\/\//.test(value)) return;
+        const next = new URL(location.href);
+        next.searchParams.set("url", value);
+        location.href = next.href;
+      });
+    })();
+  </script>
+</body>
+</html>

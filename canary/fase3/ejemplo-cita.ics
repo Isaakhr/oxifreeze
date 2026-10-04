@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Oxifreeze//Agenda//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:OXI-1012-K959@oxifreeze.mx
+DTSTAMP:20261002T152328Z
+DTSTART:20261012T160000Z
+DTEND:20261012T180000Z
+SUMMARY:Oxifreeze · Reparación / recarga de gas
+LOCATION:Calle Ocho 210\, Otay Universidad\, Tijuana\, B.C.
+DESCRIPTION:Folio: OXI-1012-K959\nCliente: Felipe Camarena\nTeléfono: 664
+ 1112233\nEl técnico te escribe por WhatsApp 30 min antes de llegar.\nPro
+ yecto escolar — empresa ficticia.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Tu técnico de Oxifreeze llega en 2 horas
+TRIGGER:-PT2H
+END:VALARM
+END:VEVENT
+END:VCALENDAR

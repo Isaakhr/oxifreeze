@@ -1,0 +1,175 @@
+/* Oxifreeze — Nuestra economía: flujo circular, reparto de $100 y sectores */
+
+.economy {
+  color: var(--text-on-dark);
+  background:
+    radial-gradient(60% 40% at 0% 0%, rgba(30, 123, 255, .2), transparent 70%),
+    radial-gradient(60% 40% at 100% 60%, rgba(34, 211, 238, .12), transparent 70%),
+    var(--ink-950);
+}
+.economy { --money: #7df9ff; --goods: #b8c7ff; }
+
+/* ---------- Layout del diagrama ---------- */
+.flow { display: grid; gap: 20px; align-items: start; }
+@media (min-width: 1024px) { .flow { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 40px; } }
+
+.flow__stage {
+  padding: 16px 8px 8px; border-radius: var(--radius-lg);
+  background: rgba(148, 220, 255, .04); border: 1px solid rgba(148, 220, 255, .12);
+}
+.flow__filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 6px; }
+.flow__filter {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 14px;
+  border-radius: 999px; border: 1.5px solid rgba(148, 220, 255, .2); background: transparent;
+  font: 700 .85rem var(--font-body); color: var(--text-on-dark-muted); cursor: pointer;
+  transition: border-color .2s, background-color .2s, color .2s;
+}
+.flow__filter:hover { color: #fff; border-color: rgba(125, 249, 255, .5); }
+.flow__filter[aria-pressed="true"] { color: var(--ink-950); background: var(--ice-100); border-color: var(--ice-100); }
+.flow__filter i { width: 18px; height: 0; border-top: 3px solid var(--money); border-radius: 2px; }
+.flow__filter--goods i { border-top: 3px dashed var(--goods); }
+
+.flow__svg { display: block; width: 100%; height: auto; max-height: calc(100svh - var(--nav-h) - 120px); margin-inline: auto; overflow: visible; font-family: var(--font-body); }
+
+/* ---------- Flujos ---------- */
+.flow-path { fill: none; stroke-width: 4; stroke-linecap: round; transition: opacity .3s; }
+.flow-path--money { stroke: var(--money); }
+.flow-path--goods { stroke: var(--goods); stroke-dasharray: 2 9; }
+.arrow--money { fill: var(--money); }
+.arrow--goods { fill: var(--goods); }
+
+.flow-label { font-size: 19px; font-weight: 800; letter-spacing: .01em; transition: opacity .3s; paint-order: stroke; stroke: var(--ink-950); stroke-width: 6px; stroke-linejoin: round; }
+.flow-label--money { fill: var(--money); }
+.flow-label--goods { fill: var(--goods); }
+
+.token { transition: opacity .3s; }
+.token--money circle { fill: var(--money); }
+.token--money text { fill: var(--ink-950); font: 800 14px var(--font-body); text-anchor: middle; }
+.token--goods rect { fill: var(--goods); }
+
+.flow__center { fill: var(--text-on-dark-muted); font: 800 15px var(--font-display); letter-spacing: .14em; text-anchor: middle; }
+.flow__center--sub { font: 600 15px var(--font-body); letter-spacing: 0; }
+
+/* Filtros dinero / bienes */
+.flow__svg[data-filter="money"] [data-kind="goods"],
+.flow__svg[data-filter="goods"] [data-kind="money"] { opacity: 0; }
+/* Al elegir un agente, se apagan los flujos que no lo tocan */
+.flow__svg .is-dim { opacity: .12; }
+.flow__svg[data-filter="money"] .is-dim[data-kind="goods"],
+.flow__svg[data-filter="goods"] .is-dim[data-kind="money"] { opacity: 0; }
+
+/* ---------- Nodos ---------- */
+.node { cursor: pointer; outline: none; }
+.node__halo { fill: rgba(125, 249, 255, .08); stroke: rgba(125, 249, 255, .25); stroke-width: 1.5; stroke-dasharray: 4 6; transform-box: fill-box; transform-origin: center; transition: fill .3s, stroke .3s; }
+.node__disc { fill: var(--ink-800); stroke: rgba(148, 220, 255, .45); stroke-width: 2.5; transition: fill .3s, stroke .3s; }
+.node__icon { fill: none; stroke: var(--cyan-300); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.node__name { fill: #fff; font: 800 19px var(--font-display); text-anchor: middle; letter-spacing: -0.02em; }
+.node__sub { fill: var(--text-on-dark-muted); font: 700 11.5px var(--font-body); text-anchor: middle; }
+.node:hover .node__disc, .node:focus-visible .node__disc { stroke: var(--cyan-300); }
+.node:focus-visible .node__halo { stroke: var(--cyan-400); stroke-width: 3; stroke-dasharray: none; }
+.node[aria-pressed="true"] .node__disc { fill: var(--cyan-300); stroke: #fff; }
+.node[aria-pressed="true"] .node__icon { stroke: var(--ink-950); }
+.node[aria-pressed="true"] .node__name { fill: var(--ink-950); }
+.node[aria-pressed="true"] .node__sub { fill: var(--ink-800); }
+/* Sin animaciones infinitas en SVG: no tienen aceleración por GPU y recalculan estilos en cada cuadro. */
+.node[aria-pressed="true"] .node__halo { fill: rgba(125, 249, 255, .18); stroke: var(--cyan-300); stroke-dasharray: none; }
+
+/* ---------- Panel de agentes ---------- */
+.flow__panel { display: grid; gap: 14px; }
+.flow__hint {
+  display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 16px;
+  background: rgba(125, 249, 255, .08); border: 1.5px dashed rgba(125, 249, 255, .3); color: var(--text-on-dark-muted);
+}
+.flow__hint svg { width: 28px; height: 28px; flex: none; fill: none; stroke: var(--cyan-300); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.flow__hint strong { color: #fff; }
+
+.agent-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(3, 11, 28, .6); border: 1px solid rgba(148, 220, 255, .12); }
+.agent-tab { min-height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--text-on-dark-muted); font: 700 .9rem var(--font-body); cursor: pointer; transition: background-color .2s, color .2s; }
+.agent-tab:hover { color: #fff; }
+.agent-tab[aria-selected="true"] { background: var(--cyan-300); color: var(--ink-950); }
+
+.agent { padding: 22px; border-radius: var(--radius-lg); background: #fff; color: var(--text); animation: agent-in .45s var(--ease-out); }
+@keyframes agent-in { from { opacity: 0; transform: translateY(10px); } }
+.agent__title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; }
+.agent__title span { font: 600 .95rem var(--font-body); letter-spacing: 0; color: var(--text-muted); }
+.agent__role { margin-top: 6px; color: var(--text-muted); }
+.agent__cols { display: grid; gap: 16px; margin-top: 16px; }
+@media (min-width: 560px) { .agent__cols { grid-template-columns: 1fr 1fr; } }
+.agent__col h4 { margin: 0 0 8px; font: 800 .75rem var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--blue-600); }
+.agent__col ul { display: grid; gap: 8px; font-size: .92rem; line-height: 1.45; }
+.agent__col li { position: relative; padding-left: 28px; }
+.tag { position: absolute; left: 0; top: 1px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; font-size: .7rem; font-weight: 800; }
+.tag--money { background: #d9fdff; color: #0b6e7a; }
+.tag--goods { background: #e6ebff; color: #3b4fb8; }
+@media (min-width: 1024px) { .agent { padding: 28px; } }
+
+/* ---------- ¿A dónde va cada $100? ---------- */
+.split { margin-top: clamp(48px, 7vw, 88px); }
+.split__title, .sectors__title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 18px; }
+.split__title span { color: var(--cyan-300); }
+.split__bar { display: flex; height: 56px; border-radius: 16px; overflow: hidden; background: rgba(148, 220, 255, .08); }
+.split__seg {
+  display: grid; place-items: center; flex: 0 0 var(--w);
+  background: var(--c); color: var(--ink-950);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .7s var(--ease-out) calc(var(--i) * 90ms);
+  box-shadow: inset -2px 0 0 var(--ink-950);
+}
+.split__bar.is-in .split__seg { transform: none; }
+.split__seg b { font: 800 .85rem var(--font-body); }
+.split__legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: .9rem; color: var(--text-on-dark-muted); }
+.split__legend li { display: inline-flex; align-items: center; gap: 8px; }
+.split__legend i { width: 12px; height: 12px; border-radius: 4px; background: var(--c); }
+.split__legend strong { color: #fff; }
+.fine-print--dark { color: var(--text-on-dark-muted); }
+@media (max-width: 559px) { .split__seg b { font-size: .7rem; } }
+
+/* ---------- Sectores (cadena de valor) ---------- */
+.sectors { margin-top: clamp(48px, 7vw, 88px); }
+.chain { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: step; }
+@media (min-width: 900px) { .chain { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px; } }
+
+.chain__step {
+  position: relative; display: flex; flex-direction: column; gap: 10px;
+  padding: 24px; border-radius: var(--radius-lg);
+  background: rgba(148, 220, 255, .05); border: 1px solid rgba(148, 220, 255, .14);
+}
+.chain__step p { color: var(--text-on-dark-muted); font-size: .95rem; }
+.chain__step strong { color: #fff; }
+.chain__step h4 { margin: 0; font: 800 1.5rem var(--font-display); letter-spacing: -0.03em; }
+.chain__n { font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan-300); }
+.chain__icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 18px; background: rgba(125, 249, 255, .1); color: var(--cyan-300); }
+.chain__icon svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.chain__ex { margin-top: auto; padding-top: 10px; border-top: 1px dashed rgba(148, 220, 255, .2); font-size: .85rem !important; font-weight: 700; }
+
+/* Tubería que conecta los pasos */
+.chain__step:not(:last-child)::after {
+  content: ""; position: absolute; z-index: 1;
+  left: 50%; bottom: -14px; width: 6px; height: 14px; margin-left: -3px;
+  background: linear-gradient(90deg, var(--blue-500), var(--cyan-300), var(--blue-500));
+}
+@media (min-width: 900px) {
+  .chain__step:not(:last-child)::after { left: auto; right: -44px; bottom: auto; top: 50%; width: 44px; height: 6px; margin: -3px 0 0; background: linear-gradient(180deg, var(--blue-500), var(--cyan-300), var(--blue-500)); }
+}
+.chain__step--3 {
+  background: linear-gradient(160deg, rgba(125, 249, 255, .18), rgba(30, 123, 255, .14));
+  border-color: rgba(125, 249, 255, .5);
+  box-shadow: 0 20px 50px -24px rgba(34, 211, 238, .6);
+}
+.chain__ex--you {
+  display: inline-flex; align-self: flex-start; align-items: center; gap: 8px;
+  padding: 6px 12px !important; border: 0 !important; border-radius: 999px;
+  background: var(--cyan-300); color: var(--ink-950) !important;
+}
+.chain__ex--you::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-950); }
+
+@media (prefers-reduced-motion: reduce) {
+  .split__seg { transform: none; }
+}
+
+@media (max-width: 599px) {
+  .node__sub { display: none; }
+  .node__name { font-size: 22px; transform: translateY(8px); }
+}
+.agent__note { position: relative; margin-top: 16px; padding: 12px 14px 12px 42px; border-radius: 12px; background: var(--ice-50); font-size: .9rem; color: var(--text); }
+.agent__note .tag { left: 14px; top: 13px; }
