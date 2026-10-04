@@ -27,11 +27,6 @@
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Fuentes sin bloquear el primer pintado (se ve la fuente del sistema mientras cargan) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Unbounded:wght@700;800&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Unbounded:wght@700;800&display=swap"></noscript>
   <link rel="stylesheet" href="css/oxifreeze.bundle.css">
   <script src="js/oxifreeze.bundle.js" defer></script>
 </head>
@@ -285,11 +280,6 @@
         </div>
       </div>
 
-      <div class="quote-bar" data-quote-bar aria-hidden="true">
-        <span>Total estimado</span>
-        <strong data-bar-total>$0</strong>
-        <a href="#recibo" tabindex="-1">Ver cotización</a>
-      </div>
     </section>
 
     <!-- ============ AGENDA ============ -->
@@ -765,6 +755,14 @@
       </symbol>
     </defs>
   </svg>
+
+  <!-- Barra flotante del total del cotizador (móvil). Va fuera de las secciones porque
+       content-visibility las vuelve contenedores de los elementos fixed. -->
+  <div class="quote-bar" data-quote-bar aria-hidden="true">
+    <span>Total estimado</span>
+    <strong data-bar-total>$0</strong>
+    <a href="#recibo" tabindex="-1">Ver cotización</a>
+  </div>
 
   <!-- Capas del modo calor / frío y del modo presentación -->
   <div class="climate-haze" aria-hidden="true" hidden></div>

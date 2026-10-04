@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 export const CSS_FILES = [
-  "css/styles.css", "css/services.css", "css/quoter.css", "css/agenda.css",
+  "css/fonts.css", "css/styles.css", "css/services.css", "css/quoter.css", "css/agenda.css",
   "css/impact.css", "css/economy.css", "css/extras.css",
 ];
 

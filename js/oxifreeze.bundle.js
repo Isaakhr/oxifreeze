@@ -1832,9 +1832,12 @@ try {
     const REVEAL = ".section__head, .svc, .q-step, .receipt, .agenda__picker, .agenda__panel, .stat, .pillar, .flow__stage, .split, .chain__step, .member, .faq__item, .footer__cta";
     const STAGGER_MS = 70;
     const groups = new Map();
+    // Arriba de todo solo se ve el hero (mide 230 % de la pantalla): no hace falta medir nada,
+    // y medir obligaría a calcular las secciones que content-visibility se está saltando.
+    const openedMidPage = window.scrollY > 0;
     document.querySelectorAll(REVEAL).forEach((el) => {
       // Lo que ya está en pantalla no se esconde (evita un parpadeo si la página abrió en un #ancla)
-      if (el.getBoundingClientRect().top < window.innerHeight) return;
+      if (openedMidPage && el.getBoundingClientRect().top < window.innerHeight) return;
       const n = groups.get(el.parentElement) || 0;
       groups.set(el.parentElement, n + 1);
       el.style.setProperty("--reveal-delay", `${Math.min(n, 5) * STAGGER_MS}ms`);

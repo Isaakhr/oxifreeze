@@ -1,0 +1,8 @@
+Fuentes incluidas (subconjunto latino, formato woff2, obtenidas de Google Fonts):
+
+- Manrope — Mikhail Sharanda y colaboradores. SIL Open Font License 1.1.
+  https://fonts.google.com/specimen/Manrope · https://openfontlicense.org
+- Unbounded — NaN (Nikolay Petroussenko y colaboradores). SIL Open Font License 1.1.
+  https://fonts.google.com/specimen/Unbounded · https://openfontlicense.org
+
+La OFL permite usar, incrustar y redistribuir estas fuentes junto con un sitio web.
