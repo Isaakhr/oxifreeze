@@ -28,8 +28,9 @@ const HEADER = (kind) =>
 
 // En JS cada archivo va en su propio try/catch: si una sección falla, las demás siguen funcionando
 // (igual que cuando eran <script> separados).
+// Cada archivo queda como una función de la lista MODULES; se ejecutan en tareas separadas.
 const wrapJs = (f, src) =>
-  `try {\n${src}\n} catch (err) {\n  console.error("[oxifreeze] Falló ${f}", err);\n}\n`;
+  `() => {\ntry {\n${src}\n} catch (err) {\n  console.error("[oxifreeze] Falló ${f}", err);\n}\n},\n`;
 
 async function concat(files, wrap) {
   const parts = await Promise.all(files.map(async (f) => {
@@ -41,10 +42,23 @@ async function concat(files, wrap) {
 
 // Todo el JS arranca DESPUÉS del primer pintado: así el hero (HTML + CSS) se ve de inmediato
 // y el trabajo de JS (armar secciones, medir el layout) no retrasa lo primero que ve el usuario.
+// Además, cada módulo corre en su propia tarea y entre uno y otro se le cede el control al
+// navegador: así nunca hay una sola tarea larga que congele la página mientras arranca.
 const bootJs = (body) => `(() => {
 "use strict";
-function bootOxifreeze() {
+const MODULES = [
 ${body}
+];
+const yieldToMain = () =>
+  (globalThis.scheduler && typeof scheduler.yield === "function")
+    ? scheduler.yield()
+    : new Promise((resolve) => setTimeout(resolve, 0));
+async function bootOxifreeze() {
+  for (const run of MODULES) {
+    run();
+    // En segundo plano los timers se frenan (~1/s): ahí conviene terminar de corrido.
+    if (!document.hidden) await yieldToMain();
+  }
 }
 // rAF → setTimeout: corre justo después de que el navegador pintó el primer cuadro.
 const start = () => requestAnimationFrame(() => setTimeout(bootOxifreeze, 0));

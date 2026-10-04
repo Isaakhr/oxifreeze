@@ -2,8 +2,9 @@
    Edita los JS de js/ fuente y corre: npm run build */
 (() => {
 "use strict";
-function bootOxifreeze() {
+const MODULES = [
 /* ---- js/config.js ---- */
+() => {
 try {
 /* Oxifreeze — configuración editable (todo lo que el equipo puede cambiar sin tocar código).
 
@@ -26,8 +27,10 @@ window.OXI_CONFIG = Object.freeze({
 } catch (err) {
   console.error("[oxifreeze] Falló js/config.js", err);
 }
+},
 
 /* ---- js/pricing.js ---- */
+() => {
 try {
 /* Oxifreeze — motor de precios (fuente única de verdad para tarjetas y cotizador).
    Precios ESTIMADOS de una empresa ficticia, en MXN con IVA incluido
@@ -160,8 +163,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/pricing.js", err);
 }
+},
 
 /* ---- js/whatsapp.js ---- */
+() => {
 try {
 /* Oxifreeze — arma mensajes de WhatsApp (link wa.me con texto prellenado). */
 (function (root) {
@@ -211,8 +216,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/whatsapp.js", err);
 }
+},
 
 /* ---- js/main.js ---- */
+() => {
 try {
 /* Oxifreeze — navegación: estado al hacer scroll, menú móvil y link activo. */
 (() => {
@@ -261,8 +268,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/main.js", err);
 }
+},
 
 /* ---- js/hero.js ---- */
+() => {
 try {
 /* Oxifreeze — hero: el scroll baja la temperatura de 38 °C a 22 °C
    y las partículas pasan de brasas que suben a aire frío que fluye. */
@@ -457,8 +466,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/hero.js", err);
 }
+},
 
 /* ---- js/services.js ---- */
+() => {
 try {
 /* Oxifreeze — tarjetas de servicios. Los precios "desde" salen de pricing.js
    para que nunca se contradigan con el cotizador. */
@@ -527,8 +538,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/services.js", err);
 }
+},
 
 /* ---- js/quoter.js ---- */
+() => {
 try {
 /* Oxifreeze — cotizador interactivo: calcula en vivo y arma el mensaje de WhatsApp.
    Todo el HTML que se inyecta sale de constantes propias o de números ya validados. */
@@ -730,8 +743,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/quoter.js", err);
 }
+},
 
 /* ---- js/booking.js ---- */
+() => {
 try {
 /* Oxifreeze — lógica de la agenda (sin DOM): días, horarios, validación,
    folio, link de Google Calendar y archivo .ics. Todo corre en el cliente. */
@@ -927,8 +942,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/booking.js", err);
 }
+},
 
 /* ---- js/agenda.js ---- */
+() => {
 try {
 /* Oxifreeze — agenda en línea: calendario de 14 días, horarios, formulario y
    pantalla de éxito con folio, WhatsApp, Google Calendar y .ics. Sin backend.
@@ -1186,8 +1203,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/agenda.js", err);
 }
+},
 
 /* ---- js/impact.js ---- */
+() => {
 try {
 /* Oxifreeze — impacto: contadores animados y calculadora de ahorro en CFE. */
 (() => {
@@ -1256,8 +1275,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/impact.js", err);
 }
+},
 
 /* ---- js/economy.js ---- */
+() => {
 try {
 /* Oxifreeze — "Nuestra economía": flujo circular interactivo (SVG generado desde datos),
    pestañas de agentes y reparto de cada $100. */
@@ -1444,8 +1465,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/economy.js", err);
 }
+},
 
 /* ---- js/qr.js ---- */
+() => {
 try {
 /* Oxifreeze — QR de la URL del sitio. La librería (vendor/qrcode.js, MIT) se carga bajo demanda. */
 (function (root) {
@@ -1494,8 +1517,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/qr.js", err);
 }
+},
 
 /* ---- js/contact.js ---- */
+() => {
 try {
 /* Oxifreeze — contacto: links generales de WhatsApp, zonas de cobertura y QR del footer. */
 (() => {
@@ -1542,8 +1567,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/contact.js", err);
 }
+},
 
 /* ---- js/team.js ---- */
+() => {
 try {
 /* Oxifreeze — tarjetas del equipo, generadas desde OXI_CONFIG.team.
    Se construyen con nodos del DOM (textContent), sin insertar HTML. */
@@ -1606,8 +1633,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/team.js", err);
 }
+},
 
 /* ---- js/climate.js ---- */
+() => {
 try {
 /* Oxifreeze — interruptor calor / frío: la demo visual del producto.
    Modo calor = "Tijuana sin Oxifreeze": toda la página se tiñe de naranja sofocante.
@@ -1668,8 +1697,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/climate.js", err);
 }
+},
 
 /* ---- js/present.js ---- */
+() => {
 try {
 /* Oxifreeze — modo presentación: la misma página se vuelve diapositivas a pantalla completa.
    Tecla P (o el botón) para entrar · → / PageDown / Espacio = siguiente · ← / PageUp = anterior
@@ -1809,8 +1840,10 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/present.js", err);
 }
+},
 
 /* ---- js/fx.js ---- */
+() => {
 try {
 /* Oxifreeze — micro-interacciones: aparición al hacer scroll y estela de escarcha del cursor.
    Nada de esto corre con prefers-reduced-motion; la estela solo en escritorio con mouse. */
@@ -1952,7 +1985,19 @@ try {
 } catch (err) {
   console.error("[oxifreeze] Falló js/fx.js", err);
 }
+},
 
+];
+const yieldToMain = () =>
+  (globalThis.scheduler && typeof scheduler.yield === "function")
+    ? scheduler.yield()
+    : new Promise((resolve) => setTimeout(resolve, 0));
+async function bootOxifreeze() {
+  for (const run of MODULES) {
+    run();
+    // En segundo plano los timers se frenan (~1/s): ahí conviene terminar de corrido.
+    if (!document.hidden) await yieldToMain();
+  }
 }
 // rAF → setTimeout: corre justo después de que el navegador pintó el primer cuadro.
 const start = () => requestAnimationFrame(() => setTimeout(bootOxifreeze, 0));
