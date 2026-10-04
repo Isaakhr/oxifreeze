@@ -115,7 +115,7 @@ Punto de partida (Lighthouse local, celular): Performance 32, Accessibility 97. 
 - [x] Pruebas: `npm test` 25/25 (nuevas: reparto del pago, servicio/duración desde cotización, total en evento y mensaje)
 
 **Canary PASS:** flujo cotizar → agendar de punta a punta con un solo folio y total correcto; recorrido de pago completo; navegación y presentación sin regresiones.
-**Estado:** [x] PASS (2026-10-04) — 375 px: mantenimiento 3×2 ton Playas → resumen "$2,670" en el formulario → "Agendar esta cotización" cae exacto en #agendar → folio OXI-1006-BJJ7, total $2,670 en éxito / WhatsApp / Google Calendar / .ics, 4 h de duración. Recorrido: 7 pasos con flujos y montos correctos ($428 + $1,087 + $1,336 + $249 = $3,100); tocar un agente pausa el recorrido. Menú 6/6 saltos exactos y presentación 12/12 en 375 y 1920; 0 errores de consola; sin scroll horizontal. Evidencia: `canary/fase7/`.
+**Estado:** [x] PASS (2026-10-04) — 375 px: mantenimiento 3×2 ton Playas → resumen "$2,670" en el formulario → "Agendar esta cotización" cae exacto en #agendar → folio OXI-1006-BJJ7, total $2,670 en éxito / WhatsApp / Google Calendar / .ics, 4 h de duración. Recorrido: 7 pasos con flujos y montos correctos ($428 + $1,087 + $1,336 + $249 = $3,100); tocar un agente pausa el recorrido. Menú 6/6 saltos exactos y presentación 12/12 en 375 y 1920; 0 errores de consola; sin scroll horizontal. Evidencia: `canary/fase7/`. PageSpeed Insights tras los cambios (2026-10-04): celular 100/100/100/100 (FCP 1.4 s, LCP 1.5 s, TBT 0 ms) · escritorio 100/100/100/100.
 
 ## Notas / decisiones tomadas en el camino
 
