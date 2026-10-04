@@ -1,0 +1,14 @@
+Fotos del equipo
+================
+
+1. Guarden aquí una foto de cada integrante con estos nombres exactos:
+   luka.jpg   iker.jpg   isaak.jpg   felipe.jpg   camarena.jpg
+   (también sirven .jpeg, .png o .webp; si son .HEIC de iPhone, expórtenlas como JPG)
+
+2. En la carpeta del proyecto corran:
+   npm run fotos
+   npm run build
+   npm test
+
+El script las endereza, las recorta en cuadrado (la cara un poco arriba del centro),
+las reduce a 480 px y las conecta solas en js/config.js. Quien no tenga foto conserva sus iniciales.

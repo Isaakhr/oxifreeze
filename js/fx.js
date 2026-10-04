@@ -15,7 +15,7 @@
 
   /* ---------- Aparición al hacer scroll ---------- */
   function setupReveal() {
-    const REVEAL = ".section__head, .svc, .q-step, .receipt, .agenda__picker, .agenda__panel, .stat, .pillar, .flow__stage, .split, .chain__step, .member, .faq__item, .footer__cta";
+    const REVEAL = ".section__head, .svc, .q-step, .receipt, .schedule__head, .agenda__picker, .agenda__panel, .stat, .flow__stage, .story, .split, .chain__step, .impact-band__title, .member, .faq__item, .footer__cta";
     const STAGGER_MS = 70;
     const groups = new Map();
     // Arriba de todo solo se ve el hero (mide 230 % de la pantalla): no hace falta medir nada,

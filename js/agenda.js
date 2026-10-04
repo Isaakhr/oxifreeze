@@ -1,5 +1,6 @@
-/* Oxifreeze — agenda en línea: calendario de 14 días, horarios, formulario y
-   pantalla de éxito con folio, WhatsApp, Google Calendar y .ics. Sin backend.
+/* Oxifreeze — agendar la cotización: calendario de 14 días, horarios, datos del cliente y
+   pantalla de éxito con un solo folio (precio + cita), WhatsApp, Google Calendar y .ics.
+   El servicio y el total salen del cotizador (OxiQuoter). Sin backend.
    Los datos que escribe el usuario solo se insertan con textContent. */
 (() => {
   "use strict";
@@ -20,7 +21,8 @@
     dayLabel: $("[data-day-label]"),
     pick: $("[data-pick-summary]"),
     pickText: $("[data-pick-text]"),
-    services: $("[data-booking-services]", form),
+    bqService: $("[data-bq-service]", form),
+    bqTotal: $("[data-bq-total]", form),
     success: $("[data-success]"),
   };
 
@@ -42,12 +44,13 @@
     booked: loadBooked(),
     day: null,
     slot: null,
-    serviceTouched: false,
     icsUrl: null,
   };
 
-  els.services.innerHTML = `<option value="">Elige un servicio…</option>` +
-    B.SERVICE_OPTIONS.map((s) => `<option value="${s.id}">${s.label}</option>`).join("");
+  const money = (n) => W.money(n).replace(" MXN", "");
+  const currentQuote = () => {
+    try { return window.OxiQuoter ? window.OxiQuoter.current() : null; } catch { return null; }
+  };
 
   /* ---------- Calendario ---------- */
   const days = B.nextDays(state.now);
@@ -145,7 +148,6 @@
   }
 
   form.addEventListener("input", (e) => {
-    if (e.target.name === "service") state.serviceTouched = true;
     if (e.target.name) showError(e.target.name, "");
   });
 
@@ -156,13 +158,15 @@
       name: form.elements.name.value,
       phone: form.elements.phone.value,
       address: form.elements.address.value,
-      service: form.elements.service.value,
       slot: slot ? slot.key : "",
     });
+    const quote = currentQuote();
+    if (!quote) result.errors.slot = "Revisa tu cotización arriba: hay un dato incompleto.";
 
-    ["slot", "name", "phone", "address", "service"].forEach((f) => showError(f, result.errors[f] || ""));
-    if (!result.ok) {
-      const first = ["slot", "name", "phone", "address", "service"].find((f) => result.errors[f]);
+    const FIELDS = ["slot", "name", "phone", "address"];
+    FIELDS.forEach((f) => showError(f, result.errors[f] || ""));
+    if (!result.ok || !quote) {
+      const first = FIELDS.find((f) => result.errors[f]);
       (first === "slot" ? els.pick : form.elements[first]).focus?.();
       if (first === "slot") els.pick.scrollIntoView({ behavior: "smooth", block: "center" });
       form.classList.remove("is-shake");
@@ -170,12 +174,13 @@
       form.classList.add("is-shake");
       return;
     }
-    confirmBooking(result.clean, slot);
+    confirmBooking(result.clean, slot, quote);
   });
 
-  function confirmBooking(clean, slot) {
+  function confirmBooking(clean, slot, quote) {
     const folio = B.makeFolio(slot.start);
-    const booking = { folio, service: clean.service, start: slot.start, name: clean.name, phone: clean.phone, address: clean.address };
+    const service = B.serviceFromQuote(quote);
+    const booking = { folio, service, total: quote.total, start: slot.start, name: clean.name, phone: clean.phone, address: clean.address };
     const ev = B.buildEvent(booking);
 
     state.booked = [...state.booked, slot.key];
@@ -191,7 +196,8 @@
     const s = (sel) => $(sel, els.success);
     s("[data-s-name]").textContent = clean.name.split(" ")[0];
     s("[data-s-folio]").textContent = folio;
-    s("[data-s-service]").textContent = clean.service.label;
+    s("[data-s-service]").textContent = service.label;
+    s("[data-s-total]").textContent = `${money(quote.total)} (IVA incluido)`;
     s("[data-s-date]").textContent = `${capitalize(B.formatLong(slot.start))}, ${slot.label} h`;
     s("[data-s-address]").textContent = clean.address;
     s("[data-s-wa]").href = W.waLink(config.whatsappNumber, B.bookingMessage(booking));
@@ -207,7 +213,7 @@
     els.success.focus({ preventScroll: true });
     els.success.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    window.OxiAgenda.last = { folio, ev, gcal: B.googleCalendarUrl(ev), ics: B.toIcs(ev, folio), wa: s("[data-s-wa]").href };
+    window.OxiAgenda.last = { folio, ev, total: quote.total, gcal: B.googleCalendarUrl(ev), ics: B.toIcs(ev, folio), wa: s("[data-s-wa]").href };
   }
 
   $("[data-copy]", els.success).addEventListener("click", async (e) => {
@@ -221,30 +227,27 @@
     setTimeout(() => { btn.textContent = "Copiar"; }, 1800);
   });
 
+  // "Hacer otra cotización": limpia los datos y regresa al cotizador
   $("[data-again]", els.success).addEventListener("click", () => {
     form.reset();
-    state.serviceTouched = false;
     state.slot = null;
     els.success.hidden = true;
     form.hidden = false;
     const firstOpen = days.find((d) => B.hasFreeSlot(d, state.now, state.booked));
     selectDay(firstOpen || null);
-    form.elements.name.focus();
+    const quoter = document.getElementById("cotizador");
+    if (window.OxiScrollTo) window.OxiScrollTo(quoter);
+    else quoter.scrollIntoView();
   });
 
-  /* ---------- Conexión con el cotizador ---------- */
-  const SERVICE_FROM_QUOTE = {
-    "instalacion:minisplit": "instalacion-minisplit",
-    "instalacion:ventana": "instalacion-ventana",
-    "instalacion:central": "instalacion-central",
-  };
-  function syncServiceFromQuote({ service, equipo }) {
-    if (state.serviceTouched || !service) return;
-    els.services.value = SERVICE_FROM_QUOTE[`${service}:${equipo}`] || service;
+  /* ---------- La cotización de arriba, resumida en el formulario ---------- */
+  function renderQuote() {
+    const q = currentQuote();
+    els.bqService.textContent = q ? B.serviceFromQuote(q).label : "Completa tu cotización arriba";
+    els.bqTotal.textContent = q ? `${money(q.total)} · IVA incluido` : "";
   }
-  document.addEventListener("oxi:quote", (e) => syncServiceFromQuote(e.detail));
-  const quoterForm = document.querySelector("[data-quoter]");
-  if (quoterForm) syncServiceFromQuote({ service: quoterForm.elements.service.value, equipo: quoterForm.elements.equipo.value });
+  document.addEventListener("oxi:quote", renderQuote);
+  renderQuote();
 
   renderMonth();
   selectDay(days.find((d) => B.hasFreeSlot(d, state.now, state.booked)) || null);

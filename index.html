@@ -61,9 +61,7 @@
       <nav class="nav__menu" id="menu" aria-label="Principal">
         <ul class="nav__links">
           <li><a href="#servicios">Servicios</a></li>
-          <li><a href="#cotizador">Cotizador</a></li>
-          <li><a href="#agenda">Agenda</a></li>
-          <li><a href="#impacto">Impacto</a></li>
+          <li><a href="#cotizador">Cotiza y agenda</a></li>
           <li><a href="#economia">Economía</a></li>
           <li><a href="#equipo">Equipo</a></li>
           <li><a href="#faq">FAQ</a></li>
@@ -112,7 +110,7 @@
                 Cotiza en 30 segundos
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </a>
-              <a class="btn btn--ghost btn--lg" href="#agenda">Agenda tu servicio</a>
+              <a class="btn btn--ghost btn--lg" href="#agendar">Agenda tu servicio</a>
             </div>
           </div>
 
@@ -163,15 +161,15 @@
       </div>
     </section>
 
-    <!-- ============ COTIZADOR ============ -->
+    <!-- ============ COTIZA Y AGENDA ============ -->
     <section class="section quoter-section" id="cotizador" aria-labelledby="t-cotizador">
       <div class="container">
         <header class="section__head section__head--dark">
           <div>
-            <p class="kicker">02 · Cotizador</p>
-            <h2 class="section__title" id="t-cotizador">Tu precio en 30 segundos.</h2>
+            <p class="kicker">02 · Cotiza y agenda</p>
+            <h2 class="section__title" id="t-cotizador">Tu precio y tu cita, en un minuto.</h2>
           </div>
-          <p class="section__lead">Elige qué necesitas y mira cómo se calcula tu precio en vivo. Cuando te guste, mándalo por WhatsApp con un toque.</p>
+          <p class="section__lead">Arma tu servicio y mira el precio en vivo. Si te convence, aparta día y hora ahí mismo: precio y cita quedan en un solo folio.</p>
         </header>
 
         <div class="quoter">
@@ -273,199 +271,113 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.8 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4 0 .6.5l.7 1.7c.1.2 0 .4-.1.6l-.5.6c-.1.2-.2.3 0 .6.5.9 1.4 1.8 2.5 2.3.3.1.4.1.6-.1l.6-.7c.2-.2.3-.2.6-.1l1.6.8c.3.1.4.2.4.4 0 .5-.2 1.2-.8 1.6-.5.3-1.3.5-2.6 0-2.2-.8-3.8-2.6-4.4-3.7-.6-1.1-.6-2-.4-2.5Z"/></svg>
                 Enviar cotización por WhatsApp
               </a>
-              <a class="receipt__alt" href="#agenda">¿Prefieres agendar directo? Elige día y hora →</a>
+              <a class="btn btn--outline btn--lg receipt__book" href="#agendar">
+                Agendar esta cotización
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+              </a>
               <p class="receipt__fine">Precios estimados · empresa ficticia (proyecto escolar)</p>
             </div>
           </aside>
         </div>
-      </div>
 
-    </section>
-
-    <!-- ============ AGENDA ============ -->
-    <section class="section agenda-section" id="agenda" aria-labelledby="t-agenda">
-      <div class="container">
-        <header class="section__head">
-          <div>
-            <p class="kicker">03 · Agenda</p>
-            <h2 class="section__title" id="t-agenda">Elige día y hora.</h2>
-          </div>
-          <p class="section__lead">Sin llamadas ni esperas. Escoge un horario libre, deja tus datos y recibe tu folio al instante. Un técnico te escribe por WhatsApp antes de llegar.</p>
-        </header>
-
-        <div class="agenda">
-          <div class="agenda__picker">
-            <div class="agenda__bar">
-              <p class="agenda__month" data-month></p>
-              <ul class="legend" aria-hidden="true">
-                <li><i class="legend__dot legend__dot--free"></i>Libre</li>
-                <li><i class="legend__dot legend__dot--busy"></i>Ocupado</li>
-              </ul>
+        <!-- Paso 6 y 7: agendar la misma cotización -->
+        <div class="schedule" id="agendar" aria-labelledby="t-agendar">
+          <header class="schedule__head">
+            <h3 class="schedule__title" id="t-agendar"><span class="q-step__n">6</span>Aparta día y hora</h3>
+            <p class="schedule__lead">Sin llamadas ni esperas: elige un horario libre, deja tus datos y recibe tu folio al instante. Un técnico te escribe por WhatsApp antes de llegar.</p>
+          </header>
+          <div class="agenda">
+            <div class="agenda__picker">
+              <div class="agenda__bar">
+                <p class="agenda__month" data-month></p>
+                <ul class="legend" aria-hidden="true">
+                  <li><i class="legend__dot legend__dot--free"></i>Libre</li>
+                  <li><i class="legend__dot legend__dot--busy"></i>Ocupado</li>
+                </ul>
+              </div>
+              <div class="cal" data-days aria-label="Elige un día"></div>
+              <h3 class="agenda__sub">Horarios · <span data-day-label></span></h3>
+              <div class="slots" data-slots aria-label="Elige una hora"></div>
+              <p class="agenda__hours">Lunes a viernes 9:00–19:00 · Sábado 9:00–15:00 · Domingo cerrado</p>
             </div>
-            <div class="cal" data-days aria-label="Elige un día"></div>
-            <h3 class="agenda__sub">Horarios · <span data-day-label></span></h3>
-            <div class="slots" data-slots aria-label="Elige una hora"></div>
-            <p class="agenda__hours">Lunes a viernes 9:00–19:00 · Sábado 9:00–15:00 · Domingo cerrado</p>
-          </div>
 
-          <div class="agenda__panel">
-            <form class="booking" data-booking novalidate>
-              <div class="booking__pick" data-pick-summary aria-live="polite" tabindex="-1" aria-describedby="err-slot">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-                <span data-pick-text>Elige día y hora en el calendario</span>
-              </div>
-              <p class="field__error" id="err-slot" data-error="slot"></p>
-
-              <div class="field">
-                <label for="b-name">Nombre completo</label>
-                <input id="b-name" name="name" type="text" autocomplete="name" maxlength="60" placeholder="Ej. Ana López" aria-describedby="err-name">
-                <p class="field__error" id="err-name" data-error="name"></p>
-              </div>
-              <div class="field">
-                <label for="b-phone">Teléfono (WhatsApp)</label>
-                <input id="b-phone" name="phone" type="tel" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="664 123 4567" aria-describedby="err-phone">
-                <p class="field__error" id="err-phone" data-error="phone"></p>
-              </div>
-              <div class="field">
-                <label for="b-address">Dirección</label>
-                <input id="b-address" name="address" type="text" autocomplete="street-address" maxlength="120" placeholder="Calle, número y colonia" aria-describedby="err-address">
-                <p class="field__error" id="err-address" data-error="address"></p>
-              </div>
-              <div class="field">
-                <label for="b-service">Servicio</label>
-                <div class="select select--light">
-                  <select id="b-service" name="service" data-booking-services aria-describedby="err-service"></select>
+            <div class="agenda__panel">
+              <form class="booking" data-booking novalidate>
+                <div class="booking__quote" data-booking-quote aria-live="polite">
+                  <span class="booking__quote-label">Tu cotización</span>
+                  <strong class="booking__quote-service" data-bq-service></strong>
+                  <span class="booking__quote-total" data-bq-total></span>
+                  <a class="booking__quote-edit" href="#cotizador">Cambiar</a>
                 </div>
-                <p class="field__error" id="err-service" data-error="service"></p>
+                <div class="booking__pick" data-pick-summary aria-live="polite" tabindex="-1" aria-describedby="err-slot">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                  <span data-pick-text>Elige día y hora en el calendario</span>
+                </div>
+                <p class="field__error" id="err-slot" data-error="slot"></p>
+
+                <div class="field">
+                  <label for="b-name">Nombre completo</label>
+                  <input id="b-name" name="name" type="text" autocomplete="name" maxlength="60" placeholder="Ej. Ana López" aria-describedby="err-name">
+                  <p class="field__error" id="err-name" data-error="name"></p>
+                </div>
+                <div class="field">
+                  <label for="b-phone">Teléfono (WhatsApp)</label>
+                  <input id="b-phone" name="phone" type="tel" autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder="664 123 4567" aria-describedby="err-phone">
+                  <p class="field__error" id="err-phone" data-error="phone"></p>
+                </div>
+                <div class="field">
+                  <label for="b-address">Dirección</label>
+                  <input id="b-address" name="address" type="text" autocomplete="street-address" maxlength="120" placeholder="Calle, número y colonia" aria-describedby="err-address">
+                  <p class="field__error" id="err-address" data-error="address"></p>
+                </div>
+                <button class="btn btn--dark btn--lg booking__submit" type="submit">
+                  Confirmar servicio
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+                <p class="booking__fine">No se cobra nada al agendar. Proyecto escolar: no llega ningún técnico real.</p>
+              </form>
+
+              <div class="success" data-success hidden tabindex="-1" aria-labelledby="success-title">
+                <div class="success__badge" aria-hidden="true">
+                  <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><path d="M20 33l8 8 16-17"/></svg>
+                </div>
+                <h3 class="success__title" id="success-title">¡Servicio agendado!</h3>
+                <p class="success__lead">Te esperamos, <span data-s-name></span>.</p>
+
+                <div class="success__folio">
+                  <span>Tu folio</span>
+                  <strong data-s-folio></strong>
+                  <button type="button" class="success__copy" data-copy>Copiar</button>
+                </div>
+
+                <dl class="success__details">
+                  <div><dt>Servicio</dt><dd data-s-service></dd></div>
+                  <div><dt>Total</dt><dd data-s-total></dd></div>
+                  <div><dt>Fecha</dt><dd data-s-date></dd></div>
+                  <div><dt>Dirección</dt><dd data-s-address></dd></div>
+                </dl>
+
+                <div class="success__actions">
+                  <a class="btn btn--whatsapp" data-s-wa href="#" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/></svg>
+                    Enviar por WhatsApp
+                  </a>
+                  <a class="btn btn--outline" data-s-gcal href="#" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>
+                    Google Calendar
+                  </a>
+                  <a class="btn btn--outline" data-s-ics href="#" download="oxifreeze-cita.ics">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+                    Descargar .ics
+                  </a>
+                </div>
+                <button type="button" class="success__again" data-again>Hacer otra cotización</button>
               </div>
-
-              <button class="btn btn--dark btn--lg booking__submit" type="submit">
-                Confirmar cita
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>
-              <p class="booking__fine">No se cobra nada al agendar. Proyecto escolar: no llega ningún técnico real.</p>
-            </form>
-
-            <div class="success" data-success hidden tabindex="-1" aria-labelledby="success-title">
-              <div class="success__badge" aria-hidden="true">
-                <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><path d="M20 33l8 8 16-17"/></svg>
-              </div>
-              <h3 class="success__title" id="success-title">¡Cita confirmada!</h3>
-              <p class="success__lead">Te esperamos, <span data-s-name></span>.</p>
-
-              <div class="success__folio">
-                <span>Tu folio</span>
-                <strong data-s-folio></strong>
-                <button type="button" class="success__copy" data-copy>Copiar</button>
-              </div>
-
-              <dl class="success__details">
-                <div><dt>Servicio</dt><dd data-s-service></dd></div>
-                <div><dt>Fecha</dt><dd data-s-date></dd></div>
-                <div><dt>Dirección</dt><dd data-s-address></dd></div>
-              </dl>
-
-              <div class="success__actions">
-                <a class="btn btn--whatsapp" data-s-wa href="#" target="_blank" rel="noopener">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/></svg>
-                  Enviar por WhatsApp
-                </a>
-                <a class="btn btn--outline" data-s-gcal href="#" target="_blank" rel="noopener">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>
-                  Google Calendar
-                </a>
-                <a class="btn btn--outline" data-s-ics href="#" download="oxifreeze-cita.ics">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
-                  Descargar .ics
-                </a>
-              </div>
-              <button type="button" class="success__again" data-again>Agendar otra cita</button>
             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ============ IMPACTO EN LA COMUNIDAD ============ -->
-    <section class="section impact" id="impacto" aria-labelledby="t-impacto">
-      <div class="container">
-        <header class="section__head">
-          <div>
-            <p class="kicker">04 · Comunidad</p>
-            <h2 class="section__title" id="t-impacto">Cómo transformamos Tijuana.</h2>
-          </div>
-          <p class="section__lead">El aire acondicionado no es un lujo cuando el termómetro pasa de 35 °C. Es salud, es trabajo para la colonia y, bien cuidado, es dinero que se queda en tu bolsillo.</p>
-        </header>
-
-        <div class="stats" data-counters>
-          <article class="stat">
-            <p class="stat__value"><span data-count="1200">0</span></p>
-            <p class="stat__label">hogares frescos al año</p>
-            <p class="stat__src">Meta del año 1 · estimado del equipo</p>
-          </article>
-          <article class="stat">
-            <p class="stat__value"><span data-count="8">0</span></p>
-            <p class="stat__label">empleos formales en Tijuana</p>
-            <p class="stat__src">6 técnicos + 2 en oficina · estimado del equipo</p>
-          </article>
-          <article class="stat">
-            <p class="stat__value"><small>hasta</small> <span data-count="15">0</span>%</p>
-            <p class="stat__label">menos luz con el filtro limpio</p>
-            <p class="stat__src">Fuente: U.S. Department of Energy, <cite>“Maintaining Your Air Conditioner”</cite> (5–15 %)</p>
-          </article>
-          <article class="stat">
-            <p class="stat__value"><span data-count="3">0</span>×</p>
-            <p class="stat__label">menos impacto climático del gas R-32 vs. R-410A</p>
-            <p class="stat__src">Fuente: IPCC AR4 · potencial de calentamiento 675 vs. 2,088</p>
-          </article>
-        </div>
-
-        <div class="pillars">
-          <article class="pillar pillar--heat">
-            <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M13 5a3 3 0 0 1 6 0v13.3a6 6 0 1 1-6 0Z"/><path d="M16 12v9"/><circle cx="16" cy="23" r="2.5"/></svg></span>
-            <h3 class="pillar__title">Salud ante los golpes de calor</h3>
-            <p>Un golpe de calor puede ser grave en adultos mayores, bebés y personas con enfermedades crónicas. Un cuarto fresco en la tarde más caliente es prevención.</p>
-            <ul class="pillar__list">
-              <li><strong>Señales de alerta:</strong> piel caliente y seca, mareo, confusión, pulso rápido.</li>
-              <li><strong>Programa “Frío Solidario”:</strong> por cada 20 servicios damos 1 mantenimiento gratis a un hogar con adultos mayores.</li>
-            </ul>
-            <p class="pillar__src">Recomendaciones basadas en los avisos de “Temporada de calor” de la Secretaría de Salud. Programa ficticio.</p>
-          </article>
-
-          <article class="pillar">
-            <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="11" cy="10" r="4"/><circle cx="22" cy="12" r="3"/><path d="M3 26c0-4.4 3.6-8 8-8s8 3.6 8 8M18 21.5a6 6 0 0 1 11 3.5"/></svg></span>
-            <h3 class="pillar__title">Empleo de la colonia</h3>
-            <p>Contratamos y capacitamos técnicos de Tijuana con salario, IMSS y prestaciones de ley. El dinero que pagas se queda en la ciudad y se vuelve a gastar en ella.</p>
-            <ul class="pillar__list">
-              <li>Capacitación en refrigeración y seguridad eléctrica.</li>
-              <li>Rutas por zona para que el técnico viva cerca de sus clientes.</li>
-            </ul>
-          </article>
-
-          <article class="pillar pillar--calc">
-            <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M18 3 7 18h8l-2 11 12-16h-8Z"/></svg></span>
-            <h3 class="pillar__title">Ahorro en tu recibo de CFE</h3>
-            <p>Un filtro sucio obliga al equipo a trabajar de más. Calcula cuánto podrías ahorrar con mantenimiento:</p>
-            <div class="saver" data-saver>
-              <label class="saver__label" for="saver-bill">Tu recibo bimestral en verano</label>
-              <output class="saver__bill" for="saver-bill" data-saver-bill>$1,200</output>
-              <input class="range__input saver__range" id="saver-bill" type="range" min="300" max="5000" step="50" value="1200">
-              <p class="saver__result">Ahorro estimado: <strong data-saver-out>$30 – $90</strong> por bimestre</p>
-              <p class="pillar__src">Supone que el A/C es la mitad del recibo en verano y un ahorro de 5–15 % (U.S. DOE). Estimado.</p>
-            </div>
-          </article>
-
-          <article class="pillar">
-            <span class="pillar__icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 3c5 7 8 11 8 15a8 8 0 0 1-16 0c0-4 3-8 8-15Z"/><path d="M12 19l3 3 5-6"/></svg></span>
-            <h3 class="pillar__title">Refrigerantes responsables</h3>
-            <p>El gas de un minisplit nunca se libera al aire: lo recuperamos con máquina y cilindro certificados. En equipos nuevos recomendamos R-32, con un tercio del impacto climático del R-410A.</p>
-            <ul class="pillar__list">
-              <li>México ratificó la Enmienda de Kigali (Protocolo de Montreal) para reducir los HFC.</li>
-              <li>Técnicos capacitados en manejo de refrigerantes.</li>
-            </ul>
-          </article>
-        </div>
-      </div>
     </section>
 
     <!-- ============ NUESTRA ECONOMÍA ============ -->
@@ -473,10 +385,10 @@
       <div class="container">
         <header class="section__head section__head--dark">
           <div>
-            <p class="kicker">05 · Nuestra economía</p>
+            <p class="kicker">03 · Nuestra economía</p>
             <h2 class="section__title" id="t-economia">Así se mueve el dinero.</h2>
           </div>
-          <p class="section__lead">Oxifreeze no vive sola: cada servicio conecta a familias, empresas y gobierno. Toca un agente económico para ver qué da y qué recibe.</p>
+          <p class="section__lead">Oxifreeze no vive sola: cada servicio conecta a familias, empresas y gobierno. Sigue un pago real paso a paso y mira a dónde va cada peso.</p>
         </header>
 
         <!-- Flujo circular -->
@@ -493,11 +405,22 @@
             </svg>
           </div>
 
-          <div class="flow__panel" data-flow-panel aria-live="polite">
-            <p class="flow__hint" data-flow-hint>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5a2 2 0 0 1 4 0v5l4.4.9a2 2 0 0 1 1.6 2.3L18 19a3 3 0 0 1-3 2h-3.5a3 3 0 0 1-2.4-1.2L5.5 15a1.6 1.6 0 0 1 2.3-2.2L9 14"/></svg>
-              <span>Toca <strong>Familias</strong>, <strong>Empresas</strong> o <strong>Gobierno</strong> en el diagrama.</span>
-            </p>
+          <div class="flow__panel" data-flow-panel>
+            <!-- Sigue un pago: recorrido paso a paso (js/payment-story.js) -->
+            <section class="story" data-story aria-labelledby="story-title">
+              <div class="story__head">
+                <p class="story__kicker" id="story-title">Sigue un pago</p>
+                <p class="story__count" data-story-count></p>
+              </div>
+              <p class="story__text" data-story-text aria-live="polite"></p>
+              <div class="story__dots" data-story-dots aria-hidden="true"></div>
+              <div class="story__controls">
+                <button type="button" class="story__btn" data-story-prev aria-label="Paso anterior">←</button>
+                <button type="button" class="story__btn story__btn--next" data-story-next>Empezar</button>
+              </div>
+            </section>
+
+            <p class="flow__or">O toca <strong>Familias</strong>, <strong>Empresas</strong> o <strong>Gobierno</strong> para ver qué da y qué recibe cada uno.</p>
             <div class="agent-tabs" role="tablist" aria-label="Agentes económicos">
               <button type="button" role="tab" class="agent-tab" data-agent-tab="familias" aria-selected="false" aria-controls="agent-familias" id="tab-familias">Familias</button>
               <button type="button" role="tab" class="agent-tab" data-agent-tab="empresas" aria-selected="false" aria-controls="agent-empresas" id="tab-empresas">Empresas</button>
@@ -614,6 +537,34 @@
             </li>
           </ol>
         </div>
+
+        <!-- Impacto en la comunidad (antes era una sección aparte) -->
+        <div class="impact-band" id="impacto" aria-labelledby="t-impacto">
+          <h3 class="impact-band__title" id="t-impacto">Lo que Oxifreeze le deja a Tijuana</h3>
+          <p class="impact-band__lead">El tema del proyecto: una empresa que transforma su comunidad. Esto es lo que cambia en la ciudad.</p>
+        <div class="stats" data-counters>
+          <article class="stat">
+            <p class="stat__value"><span data-count="1200">0</span></p>
+            <p class="stat__label">hogares frescos al año</p>
+            <p class="stat__src">Meta del año 1 · estimado del equipo</p>
+          </article>
+          <article class="stat">
+            <p class="stat__value"><span data-count="8">0</span></p>
+            <p class="stat__label">empleos formales en Tijuana</p>
+            <p class="stat__src">6 técnicos + 2 en oficina · estimado del equipo</p>
+          </article>
+          <article class="stat">
+            <p class="stat__value"><small>hasta</small> <span data-count="15">0</span>%</p>
+            <p class="stat__label">menos luz con el filtro limpio</p>
+            <p class="stat__src">Fuente: U.S. Department of Energy, <cite>“Maintaining Your Air Conditioner”</cite> (5–15 %)</p>
+          </article>
+          <article class="stat">
+            <p class="stat__value"><span data-count="3">0</span>×</p>
+            <p class="stat__label">menos impacto climático del gas R-32 vs. R-410A</p>
+            <p class="stat__src">Fuente: IPCC AR4 · potencial de calentamiento 675 vs. 2,088</p>
+          </article>
+        </div>
+        </div>
       </div>
     </section>
 
@@ -622,7 +573,7 @@
       <div class="container">
         <header class="section__head">
           <div>
-            <p class="kicker">06 · Equipo</p>
+            <p class="kicker">04 · Equipo</p>
             <h2 class="section__title" id="t-equipo">Quiénes somos.</h2>
           </div>
           <p class="section__lead">Cinco estudiantes de Tijuana que se cansaron de sudar en clase y decidieron convertir el calor en una empresa.</p>
@@ -635,7 +586,7 @@
     <section class="section faq-section" id="faq" aria-labelledby="t-faq">
       <div class="container faq-wrap">
         <header class="faq-head">
-          <p class="kicker">07 · Preguntas</p>
+          <p class="kicker">05 · Preguntas</p>
           <h2 class="section__title" id="t-faq">Preguntas frecuentes.</h2>
           <p class="section__lead">¿No encuentras tu duda? Escríbenos por WhatsApp y te respondemos en minutos.</p>
           <a class="btn btn--dark" data-wa-general href="#" target="_blank" rel="noopener">Preguntar por WhatsApp</a>
@@ -722,7 +673,7 @@
           <h3 class="footer__h">Explora</h3>
           <ul class="footer__links">
             <li><a href="#cotizador">Cotizador</a></li>
-            <li><a href="#agenda">Agenda tu servicio</a></li>
+            <li><a href="#agendar">Agenda tu servicio</a></li>
             <li><a href="#economia">Nuestra economía</a></li>
             <li><a href="qr.html">Código QR</a></li>
             <li><button type="button" class="footer__present" data-present-start>Modo presentación <kbd>P</kbd></button></li>

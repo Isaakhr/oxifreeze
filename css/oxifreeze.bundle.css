@@ -734,16 +734,22 @@ html.is-presenting .section { content-visibility: visible; }
   .receipt__paper { padding: 32px 32px calc(28px + var(--edge)); }
 }
 
-.receipt__alt {
-  display: block; margin-top: 12px; text-align: center;
-  font-size: .88rem; font-weight: 700; color: var(--blue-600); text-decoration: none;
-}
-.receipt__alt:hover { text-decoration: underline; text-underline-offset: 3px; }
+.receipt__book { width: 100%; margin-top: 10px; white-space: normal; text-align: center; }
+.receipt__book svg { width: 20px; height: 20px; }
+.receipt__book:hover svg { transform: translateY(3px); }
 
 /* ---- css/agenda.css ---- */
 /* Oxifreeze — agenda en línea */
 
-.agenda-section { background: var(--ice-100); }
+/* Bloque "Aparta día y hora": vive dentro de la sección oscura de Cotiza y agenda */
+.schedule { margin-top: clamp(40px, 6vw, 72px); scroll-margin-top: var(--nav-h); }
+.schedule__head { margin-bottom: 20px; }
+.schedule__title {
+  display: flex; align-items: center; gap: 12px;
+  font-size: clamp(1.5rem, 3.4vw, 2.3rem); font-weight: 800; letter-spacing: -0.035em; color: #fff;
+}
+.schedule__title .q-step__n { width: 34px; height: 34px; font-size: .95rem; }
+.schedule__lead { margin-top: 10px; max-width: 62ch; color: var(--text-on-dark-muted); }
 
 .agenda { display: grid; gap: 20px; align-items: start; }
 @media (min-width: 1024px) {
@@ -751,6 +757,7 @@ html.is-presenting .section { content-visibility: visible; }
 }
 
 .agenda__picker, .agenda__panel {
+  color: var(--text); /* tarjetas blancas dentro de una sección oscura */
   padding: 22px;
   border-radius: var(--radius-lg);
   background: #fff;
@@ -836,6 +843,18 @@ html.is-presenting .section { content-visibility: visible; }
 
 /* ---------- Formulario ---------- */
 .booking { display: grid; gap: 16px; }
+
+/* Resumen de la cotización dentro del formulario */
+.booking__quote {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center;
+  padding: 14px 16px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--ice-100), var(--ice-200));
+}
+.booking__quote-label { grid-column: 1 / -1; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--blue-600); }
+.booking__quote-service { font-weight: 800; line-height: 1.3; color: var(--text); }
+.booking__quote-total { grid-column: 1; font: 800 1.25rem/1.1 var(--font-display); letter-spacing: -0.03em; color: var(--blue-600); }
+.booking__quote-edit { grid-column: 2; grid-row: 2 / 4; align-self: center; padding: 8px 12px; border-radius: 10px; background: #fff; font-size: .85rem; font-weight: 800; color: var(--blue-600); text-decoration: none; }
+.booking__quote-edit:hover { background: var(--ink-900); color: #fff; }
 .booking.is-shake { animation: shake .4s; }
 @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 
@@ -925,78 +944,39 @@ html.is-presenting .section { content-visibility: visible; }
 }
 
 /* ---- css/impact.css ---- */
-/* Oxifreeze — impacto en la comunidad */
+/* Oxifreeze — "Lo que Oxifreeze le deja a Tijuana": bloque de impacto que cierra "Nuestra economía" */
 
-.impact { background: #fff; }
+.impact-band {
+  margin-top: clamp(48px, 7vw, 88px);
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgba(125, 249, 255, .16), transparent 60%),
+    rgba(148, 220, 255, .05);
+  border: 1px solid rgba(125, 249, 255, .28);
+}
+.impact-band__title { font-size: clamp(1.5rem, 3.4vw, 2.4rem); font-weight: 800; letter-spacing: -0.035em; }
+.impact-band__lead { margin: 10px 0 clamp(20px, 3vw, 32px); max-width: 60ch; color: var(--text-on-dark-muted); }
 
 /* ---------- Contadores ---------- */
-.stats {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
-  margin-bottom: clamp(28px, 4vw, 48px);
-}
-@media (min-width: 1024px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 1024px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; } }
 
 .stat {
   display: flex; flex-direction: column; gap: 6px;
   padding: 18px 16px; border-radius: var(--radius);
-  background: var(--ice-50); border: 1px solid rgba(30, 123, 255, .1);
+  background: rgba(3, 11, 28, .55); border: 1px solid rgba(148, 220, 255, .14);
 }
 .stat__value {
-  font: 800 clamp(2rem, 7vw, 3.4rem)/1 var(--font-display); letter-spacing: -0.05em;
+  font: 800 clamp(2rem, 7vw, 3.2rem)/1 var(--font-display); letter-spacing: -0.05em;
   font-variant-numeric: tabular-nums;
-  background: linear-gradient(135deg, var(--blue-600), var(--cyan-400)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  background: linear-gradient(135deg, #fff, var(--cyan-300) 45%, var(--blue-500)); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.stat__label { font-weight: 700; line-height: 1.3; }
-.stat__src { margin-top: auto; padding-top: 6px; font-size: .74rem; line-height: 1.4; color: var(--text-muted); }
+.stat__value small { display: block; margin-bottom: 2px; font-size: .38em; letter-spacing: 0; }
+.stat__label { font-weight: 700; line-height: 1.3; color: #fff; }
+.stat__src { margin-top: auto; padding-top: 6px; font-size: .74rem; line-height: 1.4; color: var(--text-on-dark-muted); }
 .stat__src cite { font-style: normal; }
-@media (min-width: 1024px) { .stat { padding: 26px 24px; } }
-
-/* ---------- Pilares ---------- */
-.pillars { display: grid; gap: 16px; }
-@media (min-width: 768px) { .pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; } }
-
-.pillar {
-  display: flex; flex-direction: column; gap: 12px;
-  padding: 24px; border-radius: var(--radius-lg);
-  background: var(--ice-50); border: 1px solid rgba(30, 123, 255, .1);
-}
-.pillar p { color: var(--text-muted); }
-.pillar__icon {
-  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
-  background: #fff; color: var(--blue-600); box-shadow: 0 6px 16px -8px rgba(19, 95, 214, .45);
-}
-.pillar__icon svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.pillar__title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
-.pillar__list { display: grid; gap: 8px; font-size: .95rem; }
-.pillar__list li { position: relative; padding-left: 18px; }
-.pillar__list li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 8px; border-radius: 2px; background: var(--cyan-400); transform: rotate(45deg); }
-.pillar__src { margin-top: auto; font-size: .75rem; }
-@media (min-width: 1024px) { .pillar { padding: 32px; } }
-
-/* El calor (rojo/naranja) solo aparece donde se habla de calor */
-.pillar--heat {
-  background: linear-gradient(160deg, #fff4ec 0%, #ffe6d6 100%);
-  border-color: rgba(232, 52, 28, .18);
-}
-.pillar--heat .pillar__icon { color: var(--heat-600); box-shadow: 0 6px 16px -8px rgba(232, 52, 28, .5); }
-.pillar--heat .pillar__list li::before { background: var(--heat-500); }
-.pillar--heat p, .pillar--heat .pillar__list { color: #5c3326; }
-.pillar--heat strong { color: #8a2a0c; }
-
-/* ---------- Calculadora de ahorro ---------- */
-.pillar--calc { background: var(--ink-900); border-color: transparent; color: var(--text-on-dark); }
-.pillar--calc p { color: var(--text-on-dark-muted); }
-.pillar--calc .pillar__icon { background: rgba(125, 249, 255, .12); color: var(--cyan-300); box-shadow: none; }
-
-.saver { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 6px 12px; padding: 18px; border-radius: 18px; background: rgba(3, 11, 28, .55); border: 1px solid rgba(148, 220, 255, .14); }
-.saver__label { font-size: .85rem; font-weight: 700; color: var(--text-on-dark-muted); }
-.saver__bill { font: 800 1.6rem/1 var(--font-display); letter-spacing: -0.04em; color: #fff; font-variant-numeric: tabular-nums; }
-.saver__range { grid-column: 1 / -1; }
-.saver__result { grid-column: 1 / -1; font-size: 1rem; }
-.pillar--calc .saver__result { color: #fff; }
-.saver__result strong { font: 800 1.35rem var(--font-display); letter-spacing: -0.03em; color: var(--cyan-300); white-space: nowrap; }
-.saver .pillar__src { grid-column: 1 / -1; }
-.stat__value small { display: block; font-size: .38em; letter-spacing: 0; margin-bottom: 2px; }
+@media (min-width: 1024px) { .stat { padding: 24px 22px; } }
 
 /* ---- css/economy.css ---- */
 /* Oxifreeze — Nuestra economía: flujo circular, reparto de $100 y sectores */
@@ -1039,7 +1019,7 @@ html.is-presenting .section { content-visibility: visible; }
 .arrow--money { fill: var(--money); }
 .arrow--goods { fill: var(--goods); }
 
-.flow-label { font-size: 19px; font-weight: 800; letter-spacing: .01em; transition: opacity .3s; paint-order: stroke; stroke: var(--ink-950); stroke-width: 6px; stroke-linejoin: round; }
+.flow-label { font-size: 24px; font-weight: 800; letter-spacing: .01em; transition: opacity .3s; paint-order: stroke; stroke: var(--ink-950); stroke-width: 6px; stroke-linejoin: round; }
 .flow-label--money { fill: var(--money); }
 .flow-label--goods { fill: var(--goods); }
 
@@ -1077,12 +1057,45 @@ html.is-presenting .section { content-visibility: visible; }
 
 /* ---------- Panel de agentes ---------- */
 .flow__panel { display: grid; gap: 14px; }
-.flow__hint {
-  display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 16px;
-  background: rgba(125, 249, 255, .08); border: 1.5px dashed rgba(125, 249, 255, .3); color: var(--text-on-dark-muted);
+.flow__or { font-size: .92rem; color: var(--text-on-dark-muted); }
+.flow__or strong { color: #fff; }
+
+/* ---------- Sigue un pago ---------- */
+.story {
+  display: grid; gap: 14px; padding: 20px; border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, rgba(125, 249, 255, .16), rgba(30, 123, 255, .12));
+  border: 1px solid rgba(125, 249, 255, .4);
 }
-.flow__hint svg { width: 28px; height: 28px; flex: none; fill: none; stroke: var(--cyan-300); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.flow__hint strong { color: #fff; }
+.story__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.story__kicker { font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan-300); }
+.story__count { font-size: .8rem; font-weight: 700; color: var(--text-on-dark-muted); }
+.story__text { min-height: 4.8em; font-size: clamp(1.02rem, .4vw + .95rem, 1.2rem); line-height: 1.5; color: #fff; }
+.story__text b { color: var(--cyan-300); font-variant-numeric: tabular-nums; }
+.story__dots { display: flex; gap: 6px; }
+.story__dots i { flex: 1; height: 4px; border-radius: 4px; background: rgba(148, 220, 255, .18); transition: background-color .3s; }
+.story__dots i.is-done { background: rgba(125, 249, 255, .5); }
+.story__dots i.is-on { background: var(--cyan-300); }
+.story__controls { display: flex; gap: 8px; }
+.story__btn {
+  min-height: 46px; padding: 0 16px; border-radius: 12px; border: 1.5px solid rgba(148, 220, 255, .3);
+  background: rgba(3, 11, 28, .5); color: #fff; font: 700 1rem var(--font-body); cursor: pointer;
+  transition: background-color .2s, border-color .2s, transform .2s var(--ease-out);
+}
+.story__btn:hover:not(:disabled) { border-color: var(--cyan-300); }
+.story__btn:active:not(:disabled) { transform: scale(.97); }
+.story__btn:disabled { opacity: .35; cursor: default; }
+.story__btn--next { flex: 1; border-color: transparent; background: linear-gradient(135deg, #b9fbff, var(--cyan-400)); color: var(--ink-950); }
+
+/* Resaltado del recorrido en el diagrama */
+.flow__svg[data-mode="story"] .node:not(.is-spot) { opacity: .35; }
+.node.is-spot .node__disc { stroke: var(--cyan-300); stroke-width: 4; }
+.flow-badge rect { fill: var(--cyan-300); stroke: var(--ink-950); stroke-width: 3; }
+.flow-badge text { fill: var(--ink-950); font: 800 20px var(--font-body); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.flow-badge { transform-box: fill-box; transform-origin: center; animation: badge-in .45s var(--ease-out) both; }
+@keyframes badge-in { from { opacity: 0; transform: scale(.6); } }
+.flow__badges { pointer-events: none; }
+.flow-label.is-badged { opacity: 0; }
+.node { transition: opacity .3s; }
 
 .agent-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(3, 11, 28, .6); border: 1px solid rgba(148, 220, 255, .12); }
 .agent-tab { min-height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--text-on-dark-muted); font: 700 .9rem var(--font-body); cursor: pointer; transition: background-color .2s, color .2s; }

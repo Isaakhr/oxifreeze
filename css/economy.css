@@ -38,7 +38,7 @@
 .arrow--money { fill: var(--money); }
 .arrow--goods { fill: var(--goods); }
 
-.flow-label { font-size: 19px; font-weight: 800; letter-spacing: .01em; transition: opacity .3s; paint-order: stroke; stroke: var(--ink-950); stroke-width: 6px; stroke-linejoin: round; }
+.flow-label { font-size: 24px; font-weight: 800; letter-spacing: .01em; transition: opacity .3s; paint-order: stroke; stroke: var(--ink-950); stroke-width: 6px; stroke-linejoin: round; }
 .flow-label--money { fill: var(--money); }
 .flow-label--goods { fill: var(--goods); }
 
@@ -76,12 +76,45 @@
 
 /* ---------- Panel de agentes ---------- */
 .flow__panel { display: grid; gap: 14px; }
-.flow__hint {
-  display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 16px;
-  background: rgba(125, 249, 255, .08); border: 1.5px dashed rgba(125, 249, 255, .3); color: var(--text-on-dark-muted);
+.flow__or { font-size: .92rem; color: var(--text-on-dark-muted); }
+.flow__or strong { color: #fff; }
+
+/* ---------- Sigue un pago ---------- */
+.story {
+  display: grid; gap: 14px; padding: 20px; border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, rgba(125, 249, 255, .16), rgba(30, 123, 255, .12));
+  border: 1px solid rgba(125, 249, 255, .4);
 }
-.flow__hint svg { width: 28px; height: 28px; flex: none; fill: none; stroke: var(--cyan-300); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.flow__hint strong { color: #fff; }
+.story__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.story__kicker { font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan-300); }
+.story__count { font-size: .8rem; font-weight: 700; color: var(--text-on-dark-muted); }
+.story__text { min-height: 4.8em; font-size: clamp(1.02rem, .4vw + .95rem, 1.2rem); line-height: 1.5; color: #fff; }
+.story__text b { color: var(--cyan-300); font-variant-numeric: tabular-nums; }
+.story__dots { display: flex; gap: 6px; }
+.story__dots i { flex: 1; height: 4px; border-radius: 4px; background: rgba(148, 220, 255, .18); transition: background-color .3s; }
+.story__dots i.is-done { background: rgba(125, 249, 255, .5); }
+.story__dots i.is-on { background: var(--cyan-300); }
+.story__controls { display: flex; gap: 8px; }
+.story__btn {
+  min-height: 46px; padding: 0 16px; border-radius: 12px; border: 1.5px solid rgba(148, 220, 255, .3);
+  background: rgba(3, 11, 28, .5); color: #fff; font: 700 1rem var(--font-body); cursor: pointer;
+  transition: background-color .2s, border-color .2s, transform .2s var(--ease-out);
+}
+.story__btn:hover:not(:disabled) { border-color: var(--cyan-300); }
+.story__btn:active:not(:disabled) { transform: scale(.97); }
+.story__btn:disabled { opacity: .35; cursor: default; }
+.story__btn--next { flex: 1; border-color: transparent; background: linear-gradient(135deg, #b9fbff, var(--cyan-400)); color: var(--ink-950); }
+
+/* Resaltado del recorrido en el diagrama */
+.flow__svg[data-mode="story"] .node:not(.is-spot) { opacity: .35; }
+.node.is-spot .node__disc { stroke: var(--cyan-300); stroke-width: 4; }
+.flow-badge rect { fill: var(--cyan-300); stroke: var(--ink-950); stroke-width: 3; }
+.flow-badge text { fill: var(--ink-950); font: 800 20px var(--font-body); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.flow-badge { transform-box: fill-box; transform-origin: center; animation: badge-in .45s var(--ease-out) both; }
+@keyframes badge-in { from { opacity: 0; transform: scale(.6); } }
+.flow__badges { pointer-events: none; }
+.flow-label.is-badged { opacity: 0; }
+.node { transition: opacity .3s; }
 
 .agent-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(3, 11, 28, .6); border: 1px solid rgba(148, 220, 255, .12); }
 .agent-tab { min-height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--text-on-dark-muted); font: 700 .9rem var(--font-body); cursor: pointer; transition: background-color .2s, color .2s; }

@@ -19,12 +19,14 @@ Para publicar cambios: `npm run build`, `npm test`, commit y `git push` (GitHub 
 | Modo presentación | Tecla **P** (o el botón de pantalla en la barra). **→ / ←**, AvPág/RePág o Espacio para avanzar; **Inicio/Fin**; **Esc** para salir. |
 | Demo calor / frío | El interruptor de la barra o la tecla **C**. |
 | QR para la mampara | Abrir `qr.html` → **Imprimir** o **Descargar PNG**. |
-| Cotizador y agenda | Funcionan en vivo durante la presentación; las citas se guardan solo en ese navegador. |
+| Cotiza y agenda | Un solo flujo: cotizas, tocas "Agendar esta cotización", eliges día/hora y sale un folio con precio + cita. Las citas se guardan solo en ese navegador. |
+| Sigue un pago | En "Nuestra economía": botón **Empezar ▶** recorre en 7 pasos a dónde va el dinero de la cotización (IVA, salarios, proveedores, ganancia). |
 
 ## Editar contenido
 
-- **WhatsApp y equipo** (roles, fotos): `js/config.js`. Fotos en `assets/equipo/` (cuadradas, ~400 px).
-- **Precios, zonas y tiempos**: `js/pricing.js` (una sola fuente: tarjetas, cotizador y footer la usan).
+- **WhatsApp y equipo** (roles): `js/config.js`.
+- **Fotos del equipo**: guárdenlas en `assets/equipo/` como `luka.jpg`, `iker.jpg`, `isaak.jpg`, `felipe.jpg`, `camarena.jpg` y corran `npm run fotos` (recorta, optimiza y las conecta solo).
+- **Precios, zonas, tiempos y reparto de cada pago**: `js/pricing.js` (una sola fuente: tarjetas, cotizador, "Sigue un pago", barra de $100 y footer).
 - **Horarios de la agenda**: `SCHEDULE` en `js/booking.js`.
 - **Textos**: `index.html`.
 

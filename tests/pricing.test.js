@@ -65,3 +65,28 @@ test("mensaje de WhatsApp incluye todos los datos y el link es válido", () => {
   assert.equal(decodeURIComponent(link.split("?text=")[1]), msg);
   assert.throws(() => W.waLink("+52 664", msg));
 });
+
+test("reparto de un pago real: IVA exacto y el resto proporcional, suma exacta", () => {
+  const parts = P.paymentBreakdown(3100);
+  const by = Object.fromEntries(parts.map((p) => [p.key, p.amount]));
+  assert.equal(by.iva, 428);                 // 3100 − 3100 / 1.16
+  assert.equal(by.salarios, 1087);
+  assert.equal(by.materiales, 932);
+  assert.equal(by.transporte, 249);
+  assert.equal(by.herramientas, 155);
+  assert.equal(by.ganancia, 249);
+  assert.equal(parts.reduce((s, p) => s + p.amount, 0), 3100);
+});
+
+test("el reparto siempre suma el total, aunque haya redondeos", () => {
+  for (const total of [750, 1200, 2670, 1750, 14000, 999, 1]) {
+    const sum = P.paymentBreakdown(total).reduce((s, p) => s + p.amount, 0);
+    assert.equal(sum, total, `total ${total}`);
+  }
+});
+
+test("la cotización incluye los ids de servicio y equipo (para agendar)", () => {
+  const q = P.quote({ service: "limpieza", equipo: "ventana", mode: "tons", tons: 1, units: 1, zona: "centro" });
+  assert.equal(q.service, "limpieza");
+  assert.equal(q.equipo, "ventana");
+});

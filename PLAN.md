@@ -102,9 +102,20 @@ Pendiente para Fase 6: `og:image` y `og:url` deben ser URL absolutas (WhatsApp n
 Punto de partida (Lighthouse local, celular): Performance 32, Accessibility 97. Las corridas locales de Lighthouse en esta compu varían mucho (69–96 en celular con el mismo código) por carga del sistema; la referencia es PageSpeed Insights.
 
 **Canary PASS:** URL pública abre en un celular real.
-**Estado:** [~] PASS técnico (2026-10-03) — URL pública 200, 0 recursos rotos, 0 errores de consola, saltos de menú exactos en 375/1920 (y con #ancla en la URL), presentación 13/13, QR verificado. **Falta solo la prueba en un celular real del equipo** (escanear el QR, cotizar, enviar a WhatsApp, agendar, abrir Google Calendar y probar pantalla completa con P en la compu de la expo). Evidencia: `canary/fase6/`.
+**Estado:** [x] PASS (2026-10-04) — Isaak lo probó en su celular real: todo funciona. Antes: PASS técnico (2026-10-03) — URL pública 200, 0 recursos rotos, 0 errores de consola, saltos de menú exactos en 375/1920 (y con #ancla en la URL), presentación 13/13, QR verificado. **Falta solo la prueba en un celular real del equipo** (escanear el QR, cotizar, enviar a WhatsApp, agendar, abrir Google Calendar y probar pantalla completa con P en la compu de la expo). Evidencia: `canary/fase6/`.
 
 ---
+
+## Fase 7 — Ronda de ajustes (pedidos de Isaak tras la prueba en celular)
+
+- [x] Cotizador + agenda en un solo flujo ("Cotiza y agenda"): el recibo tiene "Agendar esta cotización", el formulario ya no pide servicio (lo toma de la cotización), un solo folio con precio + cita; el total viaja a WhatsApp, Google Calendar y .ics; duración de la cita según servicio y equipos
+- [x] "Cómo transformamos Tijuana" fusionada en "Nuestra economía" como bloque final "Lo que Oxifreeze le deja a Tijuana" (4 contadores con fuentes); se quitaron pilares y calculadora
+- [x] Diagrama más simple (etiquetas de 1–2 palabras, más grandes) + recorrido "Sigue un pago" de 7 pasos con montos reales de la cotización (reparto exacto: suma = total)
+- [x] Script de fotos del equipo (`npm run fotos`) — pendiente que el equipo deje las fotos en `assets/equipo/`
+- [x] Pruebas: `npm test` 25/25 (nuevas: reparto del pago, servicio/duración desde cotización, total en evento y mensaje)
+
+**Canary PASS:** flujo cotizar → agendar de punta a punta con un solo folio y total correcto; recorrido de pago completo; navegación y presentación sin regresiones.
+**Estado:** [x] PASS (2026-10-04) — 375 px: mantenimiento 3×2 ton Playas → resumen "$2,670" en el formulario → "Agendar esta cotización" cae exacto en #agendar → folio OXI-1006-BJJ7, total $2,670 en éxito / WhatsApp / Google Calendar / .ics, 4 h de duración. Recorrido: 7 pasos con flujos y montos correctos ($428 + $1,087 + $1,336 + $249 = $3,100); tocar un agente pausa el recorrido. Menú 6/6 saltos exactos y presentación 12/12 en 375 y 1920; 0 errores de consola; sin scroll horizontal. Evidencia: `canary/fase7/`.
 
 ## Notas / decisiones tomadas en el camino
 

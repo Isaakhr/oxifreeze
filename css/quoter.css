@@ -236,8 +236,6 @@
   .receipt__paper { padding: 32px 32px calc(28px + var(--edge)); }
 }
 
-.receipt__alt {
-  display: block; margin-top: 12px; text-align: center;
-  font-size: .88rem; font-weight: 700; color: var(--blue-600); text-decoration: none;
-}
-.receipt__alt:hover { text-decoration: underline; text-underline-offset: 3px; }
+.receipt__book { width: 100%; margin-top: 10px; white-space: normal; text-align: center; }
+.receipt__book svg { width: 20px; height: 20px; }
+.receipt__book:hover svg { transform: translateY(3px); }

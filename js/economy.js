@@ -1,5 +1,5 @@
 /* Oxifreeze — "Nuestra economía": flujo circular interactivo (SVG generado desde datos),
-   pestañas de agentes y reparto de cada $100. */
+   pestañas de agentes, resaltado para "Sigue un pago" (payment-story.js) y reparto de cada $100. */
 (() => {
   "use strict";
 
@@ -20,14 +20,14 @@
 
   // pts: curva cúbica en el sentido del flujo. side: 1 = etiqueta arriba del texto, -1 = abajo (sin que choque con su pareja).
   const FLOWS = [
-    { id: "a1", kind: "money", from: "familias", to: "empresas", label: "Pago del servicio", side: 1, pts: [[170, 425], [260, 355], [380, 355], [470, 425]] },
-    { id: "a2", kind: "goods", from: "empresas", to: "familias", label: "Instalación y mantenimiento", side: -1, pts: [[462, 452], [380, 405], [260, 405], [178, 452]] },
+    { id: "a1", kind: "money", from: "familias", to: "empresas", label: "Pago", side: 1, pts: [[170, 425], [260, 355], [380, 355], [470, 425]] },
+    { id: "a2", kind: "goods", from: "empresas", to: "familias", label: "Servicio de A/C", side: -1, pts: [[462, 452], [380, 405], [260, 405], [178, 452]] },
     { id: "a3", kind: "goods", from: "familias", to: "empresas", label: "Trabajo", side: 1, pts: [[178, 488], [260, 535], [380, 535], [462, 488]] },
     { id: "a4", kind: "money", from: "empresas", to: "familias", label: "Salarios", side: -1, pts: [[470, 515], [380, 590], [260, 590], [170, 515]] },
-    { id: "b1", kind: "money", from: "familias", to: "gobierno", label: "Impuestos: IVA", side: 1, pts: [[70, 410], [40, 290], [130, 150], [252, 95]] },
-    { id: "b2", kind: "goods", from: "gobierno", to: "familias", label: "Salud, calles, luz", side: -1, pts: [[262, 140], [190, 180], [150, 290], [138, 402]] },
-    { id: "c1", kind: "money", from: "empresas", to: "gobierno", label: "ISR, IVA, IMSS", side: 1, pts: [[570, 410], [600, 290], [510, 150], [388, 95]] },
-    { id: "c2", kind: "goods", from: "gobierno", to: "empresas", label: "Permisos y normas", side: -1, pts: [[378, 140], [450, 180], [490, 290], [502, 402]] },
+    { id: "b1", kind: "money", from: "familias", to: "gobierno", label: "Impuestos", side: 1, pts: [[70, 410], [40, 290], [130, 150], [252, 95]] },
+    { id: "b2", kind: "goods", from: "gobierno", to: "familias", label: "Calles y luz", side: -1, pts: [[262, 140], [190, 180], [150, 290], [138, 402]] },
+    { id: "c1", kind: "money", from: "empresas", to: "gobierno", label: "Impuestos", side: 1, pts: [[570, 410], [600, 290], [510, 150], [388, 95]] },
+    { id: "c2", kind: "goods", from: "gobierno", to: "empresas", label: "Permisos", side: -1, pts: [[378, 140], [450, 180], [490, 290], [502, 402]] },
   ];
 
   const el = (tag, attrs = {}, parent) => {
@@ -66,14 +66,14 @@
   const gNodes = el("g", { class: "flow__nodes" }, svg);
 
   FLOWS.forEach((f) => {
-    const common = { "data-kind": f.kind, "data-agents": `${f.from} ${f.to}` };
+    const common = { "data-kind": f.kind, "data-agents": `${f.from} ${f.to}`, "data-flow-id": f.id };
     el("path", { id: `flow-${f.id}`, d: toD(f.pts), class: `flow-path flow-path--${f.kind}`, "marker-end": `url(#arrow-${f.kind})`, ...common }, gPaths);
 
     const labelPts = offsetCurve(leftToRight(f.pts), f.side * LABEL_GAP);
     el("path", { id: `label-${f.id}`, d: toD(labelPts), fill: "none", stroke: "none" }, defs);
     const text = el("text", { class: `flow-label flow-label--${f.kind}`, "dominant-baseline": "middle", ...common }, gLabels);
     const tp = el("textPath", { href: `#label-${f.id}`, startOffset: "50%", "text-anchor": "middle" }, text);
-    tp.textContent = f.kind === "money" ? `${f.label} $` : f.label;
+    tp.textContent = f.label;
 
     for (let i = 0; i < TOKENS_PER_FLOW; i++) {
       const g = el("g", { class: `token token--${f.kind}`, ...common }, gTokens);
@@ -102,18 +102,72 @@
 
   /* ---------- Interacción ---------- */
   const panel = document.querySelector("[data-flow-panel]");
-  const hint = panel.querySelector("[data-flow-hint]");
   const tabs = [...panel.querySelectorAll("[data-agent-tab]")];
   const agents = [...panel.querySelectorAll("[data-agent]")];
   const nodes = [...svg.querySelectorAll("[data-node]")];
   const filters = [...document.querySelectorAll("[data-filter]")];
 
+  /* ---------- Resaltado para "Sigue un pago" ---------- */
+  const BADGE_CHAR_PX = 13;
+  const BADGE_PAD_PX = 26;
+  const BADGE_H = 38;
+  const NODE_BADGE_OFFSET = NODE_R + 30;
+  let badgeLayer = null;
+
+  function badge(x, y, text) {
+    // Grupo externo = posición; interno = animación (una animación CSS de transform pisaría el translate).
+    const at = el("g", { transform: `translate(${Math.round(x)} ${Math.round(y)})` }, badgeLayer);
+    const g = el("g", { class: "flow-badge" }, at);
+    const w = text.length * BADGE_CHAR_PX + BADGE_PAD_PX;
+    el("rect", { x: -w / 2, y: -BADGE_H / 2, width: w, height: BADGE_H, rx: BADGE_H / 2 }, g);
+    el("text", { y: 7 }, g).textContent = text;
+  }
+
+  function clearSpotlight() {
+    delete svg.dataset.mode;
+    svg.querySelectorAll(".is-dim, .is-spot, .is-badged").forEach((n) => n.classList.remove("is-dim", "is-spot", "is-badged"));
+    badgeLayer?.remove();
+    badgeLayer = null;
+  }
+
+  /** Resalta flujos y nodos, y pone montos sobre ellos. Todo lo demás se atenúa. */
+  function spotlight({ flows = [], nodes: spotNodes = [], badges = [] }) {
+    clearSpotlight();
+    resetAgents();
+    svg.dataset.mode = "story";
+    svg.querySelectorAll("[data-flow-id]").forEach((item) => {
+      item.classList.toggle("is-dim", !flows.includes(item.dataset.flowId));
+    });
+    nodes.forEach((n) => n.classList.toggle("is-spot", spotNodes.includes(n.dataset.node)));
+    badgeLayer = el("g", { class: "flow__badges", "aria-hidden": "true" }, svg);
+    badges.forEach((b) => {
+      if (b.flow) {
+        // La etiqueta de esa flecha se oculta: el monto la reemplaza
+        svg.querySelector(`.flow-label[data-flow-id="${b.flow}"]`)?.classList.add("is-badged");
+        const path = svg.querySelector(`#flow-${b.flow}`);
+        const pt = path.getPointAtLength(path.getTotalLength() / 2);
+        badge(pt.x, pt.y, b.text);
+      } else if (b.node) {
+        const n = NODES[b.node];
+        badge(n.x, n.y - NODE_BADGE_OFFSET, b.text);
+      }
+    });
+  }
+
+  function resetAgents() {
+    delete svg.dataset.active;
+    nodes.forEach((n) => n.setAttribute("aria-pressed", "false"));
+    tabs.forEach((t) => t.setAttribute("aria-selected", "false"));
+    agents.forEach((a) => { a.hidden = true; });
+  }
+
   function selectAgent(key, { scroll = false } = {}) {
+    clearSpotlight();
     svg.dataset.active = key;
     nodes.forEach((n) => n.setAttribute("aria-pressed", String(n.dataset.node === key)));
     tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.agentTab === key)));
     agents.forEach((a) => { a.hidden = a.dataset.agent !== key; });
-    hint.hidden = true;
+    document.dispatchEvent(new CustomEvent("oxi:agent", { detail: { key } }));
     svg.querySelectorAll("[data-agents]").forEach((item) => {
       item.classList.toggle("is-dim", !item.dataset.agents.split(" ").includes(key));
     });
@@ -156,14 +210,13 @@
   syncMotion();
 
   /* ---------- ¿A dónde va cada $100? ---------- */
-  const SPLIT = [
-    { label: "Salarios", value: 35, color: "#7df9ff" },
-    { label: "Materiales y refrigerante", value: 30, color: "#22d3ee" },
-    { label: "IVA al SAT", value: 14, color: "#1e7bff" },
-    { label: "Transporte", value: 8, color: "#8aa4ff" },
-    { label: "Herramientas y web", value: 5, color: "#c6ecff" },
-    { label: "Ganancia", value: 8, color: "#ffffff" },
-  ];
+  const SPLIT_COLORS = { salarios: "#7df9ff", materiales: "#22d3ee", iva: "#1e7bff", transporte: "#8aa4ff", herramientas: "#c6ecff", ganancia: "#ffffff" };
+  const SPLIT_ORDER = ["salarios", "materiales", "iva", "transporte", "herramientas", "ganancia"];
+  const parts = window.OxiPricing.paymentBreakdown(100);
+  const SPLIT = SPLIT_ORDER.map((key) => {
+    const p = parts.find((x) => x.key === key);
+    return { label: p.label, value: p.amount, color: SPLIT_COLORS[key] };
+  });
   const bar = document.querySelector("[data-split]");
   const legend = document.querySelector("[data-split-legend]");
   if (bar && legend) {
@@ -178,5 +231,5 @@
     }, { threshold: 0.4 }).observe(bar);
   }
 
-  window.OxiEconomy = { selectAgent, FLOWS };
+  window.OxiEconomy = { selectAgent, spotlight, clearSpotlight, FLOWS };
 })();

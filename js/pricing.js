@@ -105,6 +105,8 @@
     const iva = Math.round(total - total / (1 + IVA_RATE));
 
     return {
+      service: input.service,
+      equipo: input.equipo,
       serviceLabel: service.label,
       equipoLabel: equipo.label,
       zonaLabel: zona.label,
@@ -122,7 +124,37 @@
     };
   }
 
-  const api = { IVA_RATE, M2_PER_TON, VOLUME_DISCOUNT, EQUIPOS, SERVICES, ZONAS, tonsForArea, unitPrice, fromPrice, quote };
+  // ¿A dónde va el dinero de un pago? El IVA es exacto (16 % sobre el precio sin impuesto);
+  // el resto se reparte con estos pesos (estimado del equipo). Para $100 da 14·35·30·8·5·8.
+  const PAYMENT_SPLIT = [
+    { key: "salarios", label: "Salarios de técnicos", weight: 35 },
+    { key: "materiales", label: "Cobre, gas y filtros", weight: 30 },
+    { key: "transporte", label: "Transporte", weight: 8 },
+    { key: "herramientas", label: "Herramientas y web", weight: 5 },
+    { key: "ganancia", label: "Ganancia", weight: 8 },
+  ];
+
+  /** Reparte un total (con IVA) en partes enteras que suman exactamente el total (mayor residuo). */
+  function paymentBreakdown(total) {
+    const iva = Math.round(total - total / (1 + IVA_RATE));
+    const rest = total - iva;
+    const weightSum = PAYMENT_SPLIT.reduce((s, p) => s + p.weight, 0);
+    const raw = PAYMENT_SPLIT.map((p) => ({ ...p, exact: (rest * p.weight) / weightSum }));
+    const parts = raw.map((p) => ({ ...p, amount: Math.floor(p.exact) }));
+    let missing = rest - parts.reduce((s, p) => s + p.amount, 0);
+    const byRemainder = [...parts.keys()].sort((a, b) => (raw[b].exact % 1) - (raw[a].exact % 1));
+    for (const i of byRemainder) {
+      if (missing <= 0) break;
+      parts[i] = { ...parts[i], amount: parts[i].amount + 1 };
+      missing -= 1;
+    }
+    return [
+      { key: "iva", label: "IVA al SAT", amount: iva },
+      ...parts.map(({ key, label, amount }) => ({ key, label, amount })),
+    ];
+  }
+
+  const api = { IVA_RATE, M2_PER_TON, VOLUME_DISCOUNT, EQUIPOS, SERVICES, ZONAS, PAYMENT_SPLIT, tonsForArea, unitPrice, fromPrice, quote, paymentBreakdown };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.OxiPricing = api;
 })(typeof window !== "undefined" ? window : globalThis);

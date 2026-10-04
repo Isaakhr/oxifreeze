@@ -5,6 +5,7 @@
   "scripts": {
     "start": "python -m http.server 5173",
     "test": "node --test tests/pricing.test.js tests/booking.test.js tests/bundle.test.js",
-    "build": "node tools/build.mjs"
+    "build": "node tools/build.mjs",
+    "fotos": "python tools/fotos.py"
   }
 }

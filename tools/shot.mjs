@@ -1,7 +1,8 @@
 // Capturas reales a cualquier tamaño usando Edge/Chrome headless por el protocolo DevTools.
 // Uso: node tools/shot.mjs <url> <salida-sin-extensión> <ancho>x<alto> [selector1 selector2 …] [--reduced-motion] [--eval=<js>]
 //   Sin selectores: una captura arriba de la página. Con selectores: una por cada uno (hace scroll).
-//   --reduced-motion emula prefers-reduced-motion: reduce. --eval imprime el resultado de una expresión al final.
+//   --reduced-motion emula prefers-reduced-motion: reduce. --cpu=4 frena el CPU como un celular.
+//   --act=<js> corre ANTES de las capturas; --eval=<js> imprime el resultado de una expresión al final.
 // Requiere Node 22+ (WebSocket nativo).
 import { spawn } from "node:child_process";
 import { writeFile, mkdtemp } from "node:fs/promises";
@@ -19,6 +20,7 @@ const [url, outBase, size = "1920x1080", ...selectors] = args.filter((a) => !a.s
 const reducedMotion = flags.includes("--reduced-motion");
 const cpuRate = Number(flags.find((f) => f.startsWith("--cpu="))?.slice(6) || 1); // --cpu=4 ≈ celular
 const evalExpr = flags.find((f) => f.startsWith("--eval="))?.slice(7);
+const actExpr = flags.find((f) => f.startsWith("--act="))?.slice(6);
 if (!url || !outBase) {
   console.error("Uso: node tools/shot.mjs <url> <salida> <ancho>x<alto> [selectores…]");
   process.exit(1);
@@ -69,6 +71,7 @@ try {
   await sleep(3500);
 
   const errors = await evaluate("JSON.stringify(window.__oxiErrors || [])");
+  if (actExpr) console.log("act:", JSON.stringify(await evaluate(actExpr)));
   const shots = selectors.length ? selectors : [null];
   for (const [i, sel] of shots.entries()) {
     if (sel) {

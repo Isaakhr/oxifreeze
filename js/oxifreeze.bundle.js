@@ -139,6 +139,8 @@ try {
     const iva = Math.round(total - total / (1 + IVA_RATE));
 
     return {
+      service: input.service,
+      equipo: input.equipo,
       serviceLabel: service.label,
       equipoLabel: equipo.label,
       zonaLabel: zona.label,
@@ -156,7 +158,37 @@ try {
     };
   }
 
-  const api = { IVA_RATE, M2_PER_TON, VOLUME_DISCOUNT, EQUIPOS, SERVICES, ZONAS, tonsForArea, unitPrice, fromPrice, quote };
+  // ¿A dónde va el dinero de un pago? El IVA es exacto (16 % sobre el precio sin impuesto);
+  // el resto se reparte con estos pesos (estimado del equipo). Para $100 da 14·35·30·8·5·8.
+  const PAYMENT_SPLIT = [
+    { key: "salarios", label: "Salarios de técnicos", weight: 35 },
+    { key: "materiales", label: "Cobre, gas y filtros", weight: 30 },
+    { key: "transporte", label: "Transporte", weight: 8 },
+    { key: "herramientas", label: "Herramientas y web", weight: 5 },
+    { key: "ganancia", label: "Ganancia", weight: 8 },
+  ];
+
+  /** Reparte un total (con IVA) en partes enteras que suman exactamente el total (mayor residuo). */
+  function paymentBreakdown(total) {
+    const iva = Math.round(total - total / (1 + IVA_RATE));
+    const rest = total - iva;
+    const weightSum = PAYMENT_SPLIT.reduce((s, p) => s + p.weight, 0);
+    const raw = PAYMENT_SPLIT.map((p) => ({ ...p, exact: (rest * p.weight) / weightSum }));
+    const parts = raw.map((p) => ({ ...p, amount: Math.floor(p.exact) }));
+    let missing = rest - parts.reduce((s, p) => s + p.amount, 0);
+    const byRemainder = [...parts.keys()].sort((a, b) => (raw[b].exact % 1) - (raw[a].exact % 1));
+    for (const i of byRemainder) {
+      if (missing <= 0) break;
+      parts[i] = { ...parts[i], amount: parts[i].amount + 1 };
+      missing -= 1;
+    }
+    return [
+      { key: "iva", label: "IVA al SAT", amount: iva },
+      ...parts.map(({ key, label, amount }) => ({ key, label, amount })),
+    ];
+  }
+
+  const api = { IVA_RATE, M2_PER_TON, VOLUME_DISCOUNT, EQUIPOS, SERVICES, ZONAS, PAYMENT_SPLIT, tonsForArea, unitPrice, fromPrice, quote, paymentBreakdown };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.OxiPricing = api;
 })(typeof window !== "undefined" ? window : globalThis);
@@ -836,14 +868,12 @@ try {
   const DIAS_CORTOS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
   const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
-  const SERVICE_OPTIONS = [
-    { id: "instalacion-minisplit", label: "Instalación de minisplit", hours: 4 },
-    { id: "instalacion-ventana", label: "Instalación de equipo de ventana", hours: 2 },
-    { id: "instalacion-central", label: "Instalación de aire central (visita técnica)", hours: 2 },
-    { id: "mantenimiento", label: "Mantenimiento preventivo", hours: 2 },
-    { id: "reparacion", label: "Reparación / recarga de gas", hours: 2 },
-    { id: "limpieza", label: "Limpieza profunda", hours: 2 },
-  ];
+  // Duración de la cita (para el calendario). La instalación de minisplit es la más larga;
+  // el aire central solo agenda la visita técnica. Cada equipo extra suma 1 h, hasta un día de trabajo.
+  const BASE_HOURS = 2;
+  const MINISPLIT_INSTALL_HOURS = 4;
+  const CENTRAL_VISIT_HOURS = 2;
+  const MAX_HOURS = 8;
 
   const pad = (n) => String(n).padStart(2, "0");
   const dateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -889,16 +919,25 @@ try {
     const name = String(data.name || "").trim().replace(/\s+/g, " ");
     const phone = normalizePhone(data.phone);
     const address = String(data.address || "").trim().replace(/\s+/g, " ");
-    const service = SERVICE_OPTIONS.find((s) => s.id === data.service);
 
     if (name.length < 3 || !/^[\p{L} .'-]+$/u.test(name)) errors.name = "Escribe tu nombre (solo letras).";
     if (phone.length !== 10) errors.phone = "El teléfono debe tener 10 dígitos.";
     if (address.length < 8) errors.address = "Escribe calle, número y colonia.";
-    if (!service) errors.service = "Elige un servicio.";
     if (!data.slot) errors.slot = "Elige día y hora en el calendario.";
 
-    return { ok: Object.keys(errors).length === 0, errors, clean: { name, phone, address, service } };
+    return { ok: Object.keys(errors).length === 0, errors, clean: { name, phone, address } };
   }
+
+  /* ---------- Servicio de la cita: sale de la cotización ---------- */
+  function serviceFromQuote(q) {
+    const units = q.units > 1 ? ` ×${q.units}` : "";
+    const label = `${q.serviceLabel} · ${q.equipoLabel} ${q.tons} ton${units}`;
+    if (q.service === "instalacion" && q.equipo === "central") return { label, hours: CENTRAL_VISIT_HOURS };
+    const base = q.service === "instalacion" && q.equipo === "minisplit" ? MINISPLIT_INSTALL_HOURS : BASE_HOURS;
+    return { label, hours: Math.min(MAX_HOURS, base + (q.units - 1)) };
+  }
+
+  const money = (n) => "$" + Math.round(n).toLocaleString("es-MX") + " MXN";
 
   /* ---------- Folio y calendario ---------- */
   function makeFolio(date, rand = Math.random) {
@@ -907,7 +946,7 @@ try {
     return `OXI-${pad(date.getMonth() + 1)}${pad(date.getDate())}-${code}`;
   }
 
-  function buildEvent({ folio, service, start, name, phone, address }) {
+  function buildEvent({ folio, service, total, start, name, phone, address }) {
     const end = new Date(start.getTime() + service.hours * HOUR_MS);
     return {
       title: `Oxifreeze · ${service.label}`,
@@ -916,6 +955,7 @@ try {
       location: `${address}, Tijuana, B.C.`,
       details: [
         `Folio: ${folio}`,
+        `Total estimado: ${money(total)} (IVA incluido)`,
         `Cliente: ${name}`,
         `Teléfono: ${phone}`,
         "El técnico te escribe por WhatsApp 30 min antes de llegar.",
@@ -986,12 +1026,13 @@ try {
     ].map(fold).join("\r\n") + "\r\n";
   }
 
-  function bookingMessage({ folio, service, start, name, phone, address }) {
+  function bookingMessage({ folio, service, total, start, name, phone, address }) {
     return [
-      "¡Hola, Oxifreeze! Acabo de agendar una cita:",
+      "¡Hola, Oxifreeze! Acabo de agendar mi servicio:",
       "",
       `• Folio: ${folio}`,
       `• Servicio: ${service.label}`,
+      `• Total estimado: ${money(total)} (IVA incluido)`,
       `• Fecha: ${formatLong(start)}, ${hourLabel(start.getHours())} h`,
       `• Nombre: ${name}`,
       `• Teléfono: ${phone}`,
@@ -1002,7 +1043,7 @@ try {
   }
 
   const api = {
-    DAYS_AHEAD, SCHEDULE, DIAS_CORTOS, MESES, SERVICE_OPTIONS,
+    DAYS_AHEAD, SCHEDULE, DIAS_CORTOS, MESES, serviceFromQuote,
     dateKey, slotKey, nextDays, slotsFor, hasFreeSlot, formatLong, hourLabel,
     normalizePhone, validate, makeFolio, buildEvent, googleCalendarUrl, toIcs, bookingMessage,
   };
@@ -1017,8 +1058,9 @@ try {
 /* ---- js/agenda.js ---- */
 ["js/agenda.js", () => {
 try {
-/* Oxifreeze — agenda en línea: calendario de 14 días, horarios, formulario y
-   pantalla de éxito con folio, WhatsApp, Google Calendar y .ics. Sin backend.
+/* Oxifreeze — agendar la cotización: calendario de 14 días, horarios, datos del cliente y
+   pantalla de éxito con un solo folio (precio + cita), WhatsApp, Google Calendar y .ics.
+   El servicio y el total salen del cotizador (OxiQuoter). Sin backend.
    Los datos que escribe el usuario solo se insertan con textContent. */
 (() => {
   "use strict";
@@ -1039,7 +1081,8 @@ try {
     dayLabel: $("[data-day-label]"),
     pick: $("[data-pick-summary]"),
     pickText: $("[data-pick-text]"),
-    services: $("[data-booking-services]", form),
+    bqService: $("[data-bq-service]", form),
+    bqTotal: $("[data-bq-total]", form),
     success: $("[data-success]"),
   };
 
@@ -1061,12 +1104,13 @@ try {
     booked: loadBooked(),
     day: null,
     slot: null,
-    serviceTouched: false,
     icsUrl: null,
   };
 
-  els.services.innerHTML = `<option value="">Elige un servicio…</option>` +
-    B.SERVICE_OPTIONS.map((s) => `<option value="${s.id}">${s.label}</option>`).join("");
+  const money = (n) => W.money(n).replace(" MXN", "");
+  const currentQuote = () => {
+    try { return window.OxiQuoter ? window.OxiQuoter.current() : null; } catch { return null; }
+  };
 
   /* ---------- Calendario ---------- */
   const days = B.nextDays(state.now);
@@ -1164,7 +1208,6 @@ try {
   }
 
   form.addEventListener("input", (e) => {
-    if (e.target.name === "service") state.serviceTouched = true;
     if (e.target.name) showError(e.target.name, "");
   });
 
@@ -1175,13 +1218,15 @@ try {
       name: form.elements.name.value,
       phone: form.elements.phone.value,
       address: form.elements.address.value,
-      service: form.elements.service.value,
       slot: slot ? slot.key : "",
     });
+    const quote = currentQuote();
+    if (!quote) result.errors.slot = "Revisa tu cotización arriba: hay un dato incompleto.";
 
-    ["slot", "name", "phone", "address", "service"].forEach((f) => showError(f, result.errors[f] || ""));
-    if (!result.ok) {
-      const first = ["slot", "name", "phone", "address", "service"].find((f) => result.errors[f]);
+    const FIELDS = ["slot", "name", "phone", "address"];
+    FIELDS.forEach((f) => showError(f, result.errors[f] || ""));
+    if (!result.ok || !quote) {
+      const first = FIELDS.find((f) => result.errors[f]);
       (first === "slot" ? els.pick : form.elements[first]).focus?.();
       if (first === "slot") els.pick.scrollIntoView({ behavior: "smooth", block: "center" });
       form.classList.remove("is-shake");
@@ -1189,12 +1234,13 @@ try {
       form.classList.add("is-shake");
       return;
     }
-    confirmBooking(result.clean, slot);
+    confirmBooking(result.clean, slot, quote);
   });
 
-  function confirmBooking(clean, slot) {
+  function confirmBooking(clean, slot, quote) {
     const folio = B.makeFolio(slot.start);
-    const booking = { folio, service: clean.service, start: slot.start, name: clean.name, phone: clean.phone, address: clean.address };
+    const service = B.serviceFromQuote(quote);
+    const booking = { folio, service, total: quote.total, start: slot.start, name: clean.name, phone: clean.phone, address: clean.address };
     const ev = B.buildEvent(booking);
 
     state.booked = [...state.booked, slot.key];
@@ -1210,7 +1256,8 @@ try {
     const s = (sel) => $(sel, els.success);
     s("[data-s-name]").textContent = clean.name.split(" ")[0];
     s("[data-s-folio]").textContent = folio;
-    s("[data-s-service]").textContent = clean.service.label;
+    s("[data-s-service]").textContent = service.label;
+    s("[data-s-total]").textContent = `${money(quote.total)} (IVA incluido)`;
     s("[data-s-date]").textContent = `${capitalize(B.formatLong(slot.start))}, ${slot.label} h`;
     s("[data-s-address]").textContent = clean.address;
     s("[data-s-wa]").href = W.waLink(config.whatsappNumber, B.bookingMessage(booking));
@@ -1226,7 +1273,7 @@ try {
     els.success.focus({ preventScroll: true });
     els.success.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    window.OxiAgenda.last = { folio, ev, gcal: B.googleCalendarUrl(ev), ics: B.toIcs(ev, folio), wa: s("[data-s-wa]").href };
+    window.OxiAgenda.last = { folio, ev, total: quote.total, gcal: B.googleCalendarUrl(ev), ics: B.toIcs(ev, folio), wa: s("[data-s-wa]").href };
   }
 
   $("[data-copy]", els.success).addEventListener("click", async (e) => {
@@ -1240,30 +1287,27 @@ try {
     setTimeout(() => { btn.textContent = "Copiar"; }, 1800);
   });
 
+  // "Hacer otra cotización": limpia los datos y regresa al cotizador
   $("[data-again]", els.success).addEventListener("click", () => {
     form.reset();
-    state.serviceTouched = false;
     state.slot = null;
     els.success.hidden = true;
     form.hidden = false;
     const firstOpen = days.find((d) => B.hasFreeSlot(d, state.now, state.booked));
     selectDay(firstOpen || null);
-    form.elements.name.focus();
+    const quoter = document.getElementById("cotizador");
+    if (window.OxiScrollTo) window.OxiScrollTo(quoter);
+    else quoter.scrollIntoView();
   });
 
-  /* ---------- Conexión con el cotizador ---------- */
-  const SERVICE_FROM_QUOTE = {
-    "instalacion:minisplit": "instalacion-minisplit",
-    "instalacion:ventana": "instalacion-ventana",
-    "instalacion:central": "instalacion-central",
-  };
-  function syncServiceFromQuote({ service, equipo }) {
-    if (state.serviceTouched || !service) return;
-    els.services.value = SERVICE_FROM_QUOTE[`${service}:${equipo}`] || service;
+  /* ---------- La cotización de arriba, resumida en el formulario ---------- */
+  function renderQuote() {
+    const q = currentQuote();
+    els.bqService.textContent = q ? B.serviceFromQuote(q).label : "Completa tu cotización arriba";
+    els.bqTotal.textContent = q ? `${money(q.total)} · IVA incluido` : "";
   }
-  document.addEventListener("oxi:quote", (e) => syncServiceFromQuote(e.detail));
-  const quoterForm = document.querySelector("[data-quoter]");
-  if (quoterForm) syncServiceFromQuote({ service: quoterForm.elements.service.value, equipo: quoterForm.elements.equipo.value });
+  document.addEventListener("oxi:quote", renderQuote);
+  renderQuote();
 
   renderMonth();
   selectDay(days.find((d) => B.hasFreeSlot(d, state.now, state.booked)) || null);
@@ -1278,7 +1322,7 @@ try {
 /* ---- js/impact.js ---- */
 ["js/impact.js", () => {
 try {
-/* Oxifreeze — impacto: contadores animados y calculadora de ahorro en CFE. */
+/* Oxifreeze — impacto en Tijuana (dentro de "Nuestra economía"): contadores animados. */
 (() => {
   "use strict";
 
@@ -1318,29 +1362,6 @@ try {
     });
   }, { threshold: 0.6 });
   counters.forEach((el) => io.observe(el));
-
-  /* ---------- Calculadora de ahorro ---------- */
-  const saver = document.querySelector("[data-saver]");
-  if (!saver) return;
-
-  const AC_SHARE = 0.5;          // el A/C como mitad del recibo en verano (supuesto)
-  const SAVING_MIN = 0.05;       // U.S. DOE: 5 %
-  const SAVING_MAX = 0.15;       // U.S. DOE: 15 %
-  const range = saver.querySelector("input[type=range]");
-  const billOut = saver.querySelector("[data-saver-bill]");
-  const resultOut = saver.querySelector("[data-saver-out]");
-  const money = (n) => "$" + fmt(n);
-
-  function renderSaver() {
-    const bill = Number(range.value);
-    const min = Number(range.min);
-    const max = Number(range.max);
-    range.style.setProperty("--fill", `${((bill - min) / (max - min)) * 100}%`);
-    billOut.textContent = money(bill);
-    resultOut.textContent = `${money(bill * AC_SHARE * SAVING_MIN)} – ${money(bill * AC_SHARE * SAVING_MAX)}`;
-  }
-  range.addEventListener("input", renderSaver);
-  renderSaver();
 })();
 } catch (err) {
   console.error("[oxifreeze] Falló js/impact.js", err);
@@ -1351,7 +1372,7 @@ try {
 ["js/economy.js", () => {
 try {
 /* Oxifreeze — "Nuestra economía": flujo circular interactivo (SVG generado desde datos),
-   pestañas de agentes y reparto de cada $100. */
+   pestañas de agentes, resaltado para "Sigue un pago" (payment-story.js) y reparto de cada $100. */
 (() => {
   "use strict";
 
@@ -1372,14 +1393,14 @@ try {
 
   // pts: curva cúbica en el sentido del flujo. side: 1 = etiqueta arriba del texto, -1 = abajo (sin que choque con su pareja).
   const FLOWS = [
-    { id: "a1", kind: "money", from: "familias", to: "empresas", label: "Pago del servicio", side: 1, pts: [[170, 425], [260, 355], [380, 355], [470, 425]] },
-    { id: "a2", kind: "goods", from: "empresas", to: "familias", label: "Instalación y mantenimiento", side: -1, pts: [[462, 452], [380, 405], [260, 405], [178, 452]] },
+    { id: "a1", kind: "money", from: "familias", to: "empresas", label: "Pago", side: 1, pts: [[170, 425], [260, 355], [380, 355], [470, 425]] },
+    { id: "a2", kind: "goods", from: "empresas", to: "familias", label: "Servicio de A/C", side: -1, pts: [[462, 452], [380, 405], [260, 405], [178, 452]] },
     { id: "a3", kind: "goods", from: "familias", to: "empresas", label: "Trabajo", side: 1, pts: [[178, 488], [260, 535], [380, 535], [462, 488]] },
     { id: "a4", kind: "money", from: "empresas", to: "familias", label: "Salarios", side: -1, pts: [[470, 515], [380, 590], [260, 590], [170, 515]] },
-    { id: "b1", kind: "money", from: "familias", to: "gobierno", label: "Impuestos: IVA", side: 1, pts: [[70, 410], [40, 290], [130, 150], [252, 95]] },
-    { id: "b2", kind: "goods", from: "gobierno", to: "familias", label: "Salud, calles, luz", side: -1, pts: [[262, 140], [190, 180], [150, 290], [138, 402]] },
-    { id: "c1", kind: "money", from: "empresas", to: "gobierno", label: "ISR, IVA, IMSS", side: 1, pts: [[570, 410], [600, 290], [510, 150], [388, 95]] },
-    { id: "c2", kind: "goods", from: "gobierno", to: "empresas", label: "Permisos y normas", side: -1, pts: [[378, 140], [450, 180], [490, 290], [502, 402]] },
+    { id: "b1", kind: "money", from: "familias", to: "gobierno", label: "Impuestos", side: 1, pts: [[70, 410], [40, 290], [130, 150], [252, 95]] },
+    { id: "b2", kind: "goods", from: "gobierno", to: "familias", label: "Calles y luz", side: -1, pts: [[262, 140], [190, 180], [150, 290], [138, 402]] },
+    { id: "c1", kind: "money", from: "empresas", to: "gobierno", label: "Impuestos", side: 1, pts: [[570, 410], [600, 290], [510, 150], [388, 95]] },
+    { id: "c2", kind: "goods", from: "gobierno", to: "empresas", label: "Permisos", side: -1, pts: [[378, 140], [450, 180], [490, 290], [502, 402]] },
   ];
 
   const el = (tag, attrs = {}, parent) => {
@@ -1418,14 +1439,14 @@ try {
   const gNodes = el("g", { class: "flow__nodes" }, svg);
 
   FLOWS.forEach((f) => {
-    const common = { "data-kind": f.kind, "data-agents": `${f.from} ${f.to}` };
+    const common = { "data-kind": f.kind, "data-agents": `${f.from} ${f.to}`, "data-flow-id": f.id };
     el("path", { id: `flow-${f.id}`, d: toD(f.pts), class: `flow-path flow-path--${f.kind}`, "marker-end": `url(#arrow-${f.kind})`, ...common }, gPaths);
 
     const labelPts = offsetCurve(leftToRight(f.pts), f.side * LABEL_GAP);
     el("path", { id: `label-${f.id}`, d: toD(labelPts), fill: "none", stroke: "none" }, defs);
     const text = el("text", { class: `flow-label flow-label--${f.kind}`, "dominant-baseline": "middle", ...common }, gLabels);
     const tp = el("textPath", { href: `#label-${f.id}`, startOffset: "50%", "text-anchor": "middle" }, text);
-    tp.textContent = f.kind === "money" ? `${f.label} $` : f.label;
+    tp.textContent = f.label;
 
     for (let i = 0; i < TOKENS_PER_FLOW; i++) {
       const g = el("g", { class: `token token--${f.kind}`, ...common }, gTokens);
@@ -1454,18 +1475,72 @@ try {
 
   /* ---------- Interacción ---------- */
   const panel = document.querySelector("[data-flow-panel]");
-  const hint = panel.querySelector("[data-flow-hint]");
   const tabs = [...panel.querySelectorAll("[data-agent-tab]")];
   const agents = [...panel.querySelectorAll("[data-agent]")];
   const nodes = [...svg.querySelectorAll("[data-node]")];
   const filters = [...document.querySelectorAll("[data-filter]")];
 
+  /* ---------- Resaltado para "Sigue un pago" ---------- */
+  const BADGE_CHAR_PX = 13;
+  const BADGE_PAD_PX = 26;
+  const BADGE_H = 38;
+  const NODE_BADGE_OFFSET = NODE_R + 30;
+  let badgeLayer = null;
+
+  function badge(x, y, text) {
+    // Grupo externo = posición; interno = animación (una animación CSS de transform pisaría el translate).
+    const at = el("g", { transform: `translate(${Math.round(x)} ${Math.round(y)})` }, badgeLayer);
+    const g = el("g", { class: "flow-badge" }, at);
+    const w = text.length * BADGE_CHAR_PX + BADGE_PAD_PX;
+    el("rect", { x: -w / 2, y: -BADGE_H / 2, width: w, height: BADGE_H, rx: BADGE_H / 2 }, g);
+    el("text", { y: 7 }, g).textContent = text;
+  }
+
+  function clearSpotlight() {
+    delete svg.dataset.mode;
+    svg.querySelectorAll(".is-dim, .is-spot, .is-badged").forEach((n) => n.classList.remove("is-dim", "is-spot", "is-badged"));
+    badgeLayer?.remove();
+    badgeLayer = null;
+  }
+
+  /** Resalta flujos y nodos, y pone montos sobre ellos. Todo lo demás se atenúa. */
+  function spotlight({ flows = [], nodes: spotNodes = [], badges = [] }) {
+    clearSpotlight();
+    resetAgents();
+    svg.dataset.mode = "story";
+    svg.querySelectorAll("[data-flow-id]").forEach((item) => {
+      item.classList.toggle("is-dim", !flows.includes(item.dataset.flowId));
+    });
+    nodes.forEach((n) => n.classList.toggle("is-spot", spotNodes.includes(n.dataset.node)));
+    badgeLayer = el("g", { class: "flow__badges", "aria-hidden": "true" }, svg);
+    badges.forEach((b) => {
+      if (b.flow) {
+        // La etiqueta de esa flecha se oculta: el monto la reemplaza
+        svg.querySelector(`.flow-label[data-flow-id="${b.flow}"]`)?.classList.add("is-badged");
+        const path = svg.querySelector(`#flow-${b.flow}`);
+        const pt = path.getPointAtLength(path.getTotalLength() / 2);
+        badge(pt.x, pt.y, b.text);
+      } else if (b.node) {
+        const n = NODES[b.node];
+        badge(n.x, n.y - NODE_BADGE_OFFSET, b.text);
+      }
+    });
+  }
+
+  function resetAgents() {
+    delete svg.dataset.active;
+    nodes.forEach((n) => n.setAttribute("aria-pressed", "false"));
+    tabs.forEach((t) => t.setAttribute("aria-selected", "false"));
+    agents.forEach((a) => { a.hidden = true; });
+  }
+
   function selectAgent(key, { scroll = false } = {}) {
+    clearSpotlight();
     svg.dataset.active = key;
     nodes.forEach((n) => n.setAttribute("aria-pressed", String(n.dataset.node === key)));
     tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.agentTab === key)));
     agents.forEach((a) => { a.hidden = a.dataset.agent !== key; });
-    hint.hidden = true;
+    document.dispatchEvent(new CustomEvent("oxi:agent", { detail: { key } }));
     svg.querySelectorAll("[data-agents]").forEach((item) => {
       item.classList.toggle("is-dim", !item.dataset.agents.split(" ").includes(key));
     });
@@ -1508,14 +1583,13 @@ try {
   syncMotion();
 
   /* ---------- ¿A dónde va cada $100? ---------- */
-  const SPLIT = [
-    { label: "Salarios", value: 35, color: "#7df9ff" },
-    { label: "Materiales y refrigerante", value: 30, color: "#22d3ee" },
-    { label: "IVA al SAT", value: 14, color: "#1e7bff" },
-    { label: "Transporte", value: 8, color: "#8aa4ff" },
-    { label: "Herramientas y web", value: 5, color: "#c6ecff" },
-    { label: "Ganancia", value: 8, color: "#ffffff" },
-  ];
+  const SPLIT_COLORS = { salarios: "#7df9ff", materiales: "#22d3ee", iva: "#1e7bff", transporte: "#8aa4ff", herramientas: "#c6ecff", ganancia: "#ffffff" };
+  const SPLIT_ORDER = ["salarios", "materiales", "iva", "transporte", "herramientas", "ganancia"];
+  const parts = window.OxiPricing.paymentBreakdown(100);
+  const SPLIT = SPLIT_ORDER.map((key) => {
+    const p = parts.find((x) => x.key === key);
+    return { label: p.label, value: p.amount, color: SPLIT_COLORS[key] };
+  });
   const bar = document.querySelector("[data-split]");
   const legend = document.querySelector("[data-split-legend]");
   if (bar && legend) {
@@ -1530,10 +1604,121 @@ try {
     }, { threshold: 0.4 }).observe(bar);
   }
 
-  window.OxiEconomy = { selectAgent, FLOWS };
+  window.OxiEconomy = { selectAgent, spotlight, clearSpotlight, FLOWS };
 })();
 } catch (err) {
   console.error("[oxifreeze] Falló js/economy.js", err);
+}
+}],
+
+/* ---- js/payment-story.js ---- */
+["js/payment-story.js", () => {
+try {
+/* Oxifreeze — "Sigue un pago": recorrido paso a paso del dinero de una cotización real
+   por el flujo circular (familias → Oxifreeze → SAT, técnicos, proveedores → de vuelta).
+   Los montos salen de la cotización actual y del mismo reparto que "¿A dónde va cada $100?". */
+(() => {
+  "use strict";
+
+  const root = document.querySelector("[data-story]");
+  const E = window.OxiEconomy;
+  const P = window.OxiPricing;
+  if (!root || !E || !P) return;
+
+  const DEFAULT_TOTAL = 3100;
+  const els = {
+    text: root.querySelector("[data-story-text]"),
+    count: root.querySelector("[data-story-count]"),
+    dots: root.querySelector("[data-story-dots]"),
+    prev: root.querySelector("[data-story-prev]"),
+    next: root.querySelector("[data-story-next]"),
+  };
+  const money = (n) => "$" + Math.round(n).toLocaleString("es-MX");
+
+  function currentTotal() {
+    try { return window.OxiQuoter?.current().total || DEFAULT_TOTAL; } catch { return DEFAULT_TOTAL; }
+  }
+
+  /** Los pasos se arman con el total de la cotización: así los números siempre cuadran. */
+  function buildSteps(total) {
+    const part = Object.fromEntries(P.paymentBreakdown(total).map((p) => [p.key, p.amount]));
+    const suppliers = part.materiales + part.transporte + part.herramientas;
+    return [
+      {
+        text: `Una familia de Tijuana paga <b>${money(total)}</b> a Oxifreeze por su servicio de aire acondicionado.`,
+        spot: { flows: ["a1", "a2"], nodes: ["familias", "empresas"], badges: [{ flow: "a1", text: money(total) }] },
+      },
+      {
+        text: `<b>${money(part.iva)}</b> de ese pago son IVA: Oxifreeze lo cobra y se lo entrega al <b>SAT</b>.`,
+        spot: { flows: ["c1"], nodes: ["empresas", "gobierno"], badges: [{ flow: "c1", text: `IVA ${money(part.iva)}` }] },
+      },
+      {
+        text: `<b>${money(part.salarios)}</b> se van en salarios de técnicos que viven en Tijuana.`,
+        spot: { flows: ["a4", "a3"], nodes: ["empresas", "familias"], badges: [{ flow: "a4", text: money(part.salarios) }] },
+      },
+      {
+        text: `<b>${money(suppliers)}</b> se pagan a otras empresas: cobre, gas y filtros (${money(part.materiales)}), transporte (${money(part.transporte)}) y herramientas y web (${money(part.herramientas)}).`,
+        spot: { flows: [], nodes: ["empresas"], badges: [{ node: "empresas", text: `Proveedores ${money(suppliers)}` }] },
+      },
+      {
+        text: `Queda una ganancia de <b>${money(part.ganancia)}</b>, y de ahí Oxifreeze también paga ISR. Cuenta: ${money(part.iva)} + ${money(part.salarios)} + ${money(suppliers)} + ${money(part.ganancia)} = <b>${money(total)}</b>.`,
+        spot: { flows: ["c1"], nodes: ["empresas"], badges: [{ node: "empresas", text: `Ganancia ${money(part.ganancia)}` }] },
+      },
+      {
+        text: "Con esos impuestos, el gobierno regresa <b>calles, alumbrado y salud</b>, y pone las reglas: permisos, normas y Profeco.",
+        spot: { flows: ["b2", "c2"], nodes: ["gobierno"], badges: [] },
+      },
+      {
+        text: "Y los técnicos gastan su salario en tiendas y servicios de Tijuana: el dinero <b>vuelve a circular</b>. Eso es el flujo circular de la economía.",
+        spot: { flows: ["a1", "a4", "b1"], nodes: ["familias"], badges: [] },
+      },
+    ];
+  }
+
+  let steps = buildSteps(currentTotal());
+  let index = -1; // -1 = presentación del recorrido
+
+  function introText() {
+    return `Sigue un pago real de <b>${money(currentTotal())}</b> (tu cotización de arriba) y mira a dónde va cada peso.`;
+  }
+
+  function render() {
+    // El texto solo contiene montos y frases propias (sin datos que escriba el usuario).
+    els.text.innerHTML = index < 0 ? introText() : steps[index].text;
+    els.count.textContent = index < 0 ? `${steps.length} pasos` : `Paso ${index + 1} de ${steps.length}`;
+    els.prev.disabled = index < 0;
+    els.next.textContent = index < 0 ? "Empezar ▶" : index === steps.length - 1 ? "Ver de nuevo ↺" : "Siguiente →";
+    els.dots.innerHTML = steps.map((_, i) => `<i class="${i === index ? "is-on" : i < index ? "is-done" : ""}"></i>`).join("");
+    if (index < 0) E.clearSpotlight();
+    else E.spotlight(steps[index].spot);
+  }
+
+  function go(i) {
+    if (i === 0 || index < 0) steps = buildSteps(currentTotal()); // el recorrido usa la cotización vigente
+    index = Math.max(-1, Math.min(steps.length - 1, i));
+    render();
+  }
+
+  els.next.addEventListener("click", () => go(index === steps.length - 1 ? 0 : index + 1));
+  els.prev.addEventListener("click", () => go(index - 1));
+
+  // Si cambian la cotización mientras el recorrido no ha empezado, se actualiza el monto.
+  document.addEventListener("oxi:quote", () => { if (index < 0) render(); });
+  // Al tocar un agente, el recorrido se pausa (el resaltado lo maneja economy.js).
+  document.addEventListener("oxi:agent", () => {
+    index = -1;
+    els.text.innerHTML = introText();
+    els.count.textContent = `${steps.length} pasos`;
+    els.prev.disabled = true;
+    els.next.textContent = "Empezar ▶";
+    els.dots.innerHTML = steps.map(() => "<i></i>").join("");
+  });
+
+  render();
+  window.OxiStory = { go, get index() { return index; }, get steps() { return steps; } };
+})();
+} catch (err) {
+  console.error("[oxifreeze] Falló js/payment-story.js", err);
 }
 }],
 
@@ -1801,13 +1986,12 @@ try {
     { title: "Tijuana se calienta", y: () => 0 },
     { title: "Tú no.", y: heroEnd },
     { title: "Servicios", y: () => topOf("#servicios") },
-    { title: "Cotizador en vivo", y: () => topOf("#cotizador") },
-    { title: "Agenda en línea", y: () => topOf("#agenda") },
-    { title: "Impacto en Tijuana", y: () => topOf("#impacto") },
-    { title: "Salud, empleo, ahorro y planeta", y: () => topOf(".pillars") },
-    { title: "Flujo circular de la economía", y: () => topOf("#economia") },
+    { title: "Cotiza en vivo", y: () => topOf("#cotizador") },
+    { title: "Agenda la misma cotización", y: () => topOf("#agendar") },
+    { title: "Flujo circular: sigue un pago", y: () => topOf(".flow") },
     { title: "¿A dónde va cada $100?", y: () => topOf(".split") },
     { title: "Sectores económicos", y: () => topOf(".sectors") },
+    { title: "Lo que Oxifreeze le deja a Tijuana", y: () => topOf("#impacto") },
     { title: "Nuestro equipo", y: () => topOf("#equipo") },
     { title: "Preguntas frecuentes", y: () => topOf("#faq") },
     { title: "¡Gracias! Escanea el QR", y: () => topOf("#contacto") },
@@ -1932,7 +2116,7 @@ try {
 
   /* ---------- Aparición al hacer scroll ---------- */
   function setupReveal() {
-    const REVEAL = ".section__head, .svc, .q-step, .receipt, .agenda__picker, .agenda__panel, .stat, .pillar, .flow__stage, .split, .chain__step, .member, .faq__item, .footer__cta";
+    const REVEAL = ".section__head, .svc, .q-step, .receipt, .schedule__head, .agenda__picker, .agenda__panel, .stat, .flow__stage, .story, .split, .chain__step, .impact-band__title, .member, .faq__item, .footer__cta";
     const STAGGER_MS = 70;
     const groups = new Map();
     // Arriba de todo solo se ve el hero (mide 230 % de la pantalla): no hace falta medir nada,

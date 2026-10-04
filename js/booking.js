@@ -16,14 +16,12 @@
   const DIAS_CORTOS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
   const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
-  const SERVICE_OPTIONS = [
-    { id: "instalacion-minisplit", label: "Instalación de minisplit", hours: 4 },
-    { id: "instalacion-ventana", label: "Instalación de equipo de ventana", hours: 2 },
-    { id: "instalacion-central", label: "Instalación de aire central (visita técnica)", hours: 2 },
-    { id: "mantenimiento", label: "Mantenimiento preventivo", hours: 2 },
-    { id: "reparacion", label: "Reparación / recarga de gas", hours: 2 },
-    { id: "limpieza", label: "Limpieza profunda", hours: 2 },
-  ];
+  // Duración de la cita (para el calendario). La instalación de minisplit es la más larga;
+  // el aire central solo agenda la visita técnica. Cada equipo extra suma 1 h, hasta un día de trabajo.
+  const BASE_HOURS = 2;
+  const MINISPLIT_INSTALL_HOURS = 4;
+  const CENTRAL_VISIT_HOURS = 2;
+  const MAX_HOURS = 8;
 
   const pad = (n) => String(n).padStart(2, "0");
   const dateKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -69,16 +67,25 @@
     const name = String(data.name || "").trim().replace(/\s+/g, " ");
     const phone = normalizePhone(data.phone);
     const address = String(data.address || "").trim().replace(/\s+/g, " ");
-    const service = SERVICE_OPTIONS.find((s) => s.id === data.service);
 
     if (name.length < 3 || !/^[\p{L} .'-]+$/u.test(name)) errors.name = "Escribe tu nombre (solo letras).";
     if (phone.length !== 10) errors.phone = "El teléfono debe tener 10 dígitos.";
     if (address.length < 8) errors.address = "Escribe calle, número y colonia.";
-    if (!service) errors.service = "Elige un servicio.";
     if (!data.slot) errors.slot = "Elige día y hora en el calendario.";
 
-    return { ok: Object.keys(errors).length === 0, errors, clean: { name, phone, address, service } };
+    return { ok: Object.keys(errors).length === 0, errors, clean: { name, phone, address } };
   }
+
+  /* ---------- Servicio de la cita: sale de la cotización ---------- */
+  function serviceFromQuote(q) {
+    const units = q.units > 1 ? ` ×${q.units}` : "";
+    const label = `${q.serviceLabel} · ${q.equipoLabel} ${q.tons} ton${units}`;
+    if (q.service === "instalacion" && q.equipo === "central") return { label, hours: CENTRAL_VISIT_HOURS };
+    const base = q.service === "instalacion" && q.equipo === "minisplit" ? MINISPLIT_INSTALL_HOURS : BASE_HOURS;
+    return { label, hours: Math.min(MAX_HOURS, base + (q.units - 1)) };
+  }
+
+  const money = (n) => "$" + Math.round(n).toLocaleString("es-MX") + " MXN";
 
   /* ---------- Folio y calendario ---------- */
   function makeFolio(date, rand = Math.random) {
@@ -87,7 +94,7 @@
     return `OXI-${pad(date.getMonth() + 1)}${pad(date.getDate())}-${code}`;
   }
 
-  function buildEvent({ folio, service, start, name, phone, address }) {
+  function buildEvent({ folio, service, total, start, name, phone, address }) {
     const end = new Date(start.getTime() + service.hours * HOUR_MS);
     return {
       title: `Oxifreeze · ${service.label}`,
@@ -96,6 +103,7 @@
       location: `${address}, Tijuana, B.C.`,
       details: [
         `Folio: ${folio}`,
+        `Total estimado: ${money(total)} (IVA incluido)`,
         `Cliente: ${name}`,
         `Teléfono: ${phone}`,
         "El técnico te escribe por WhatsApp 30 min antes de llegar.",
@@ -166,12 +174,13 @@
     ].map(fold).join("\r\n") + "\r\n";
   }
 
-  function bookingMessage({ folio, service, start, name, phone, address }) {
+  function bookingMessage({ folio, service, total, start, name, phone, address }) {
     return [
-      "¡Hola, Oxifreeze! Acabo de agendar una cita:",
+      "¡Hola, Oxifreeze! Acabo de agendar mi servicio:",
       "",
       `• Folio: ${folio}`,
       `• Servicio: ${service.label}`,
+      `• Total estimado: ${money(total)} (IVA incluido)`,
       `• Fecha: ${formatLong(start)}, ${hourLabel(start.getHours())} h`,
       `• Nombre: ${name}`,
       `• Teléfono: ${phone}`,
@@ -182,7 +191,7 @@
   }
 
   const api = {
-    DAYS_AHEAD, SCHEDULE, DIAS_CORTOS, MESES, SERVICE_OPTIONS,
+    DAYS_AHEAD, SCHEDULE, DIAS_CORTOS, MESES, serviceFromQuote,
     dateKey, slotKey, nextDays, slotsFor, hasFreeSlot, formatLong, hourLabel,
     normalizePhone, validate, makeFolio, buildEvent, googleCalendarUrl, toIcs, bookingMessage,
   };

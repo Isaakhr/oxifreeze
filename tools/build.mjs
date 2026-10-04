@@ -16,7 +16,7 @@ export const CSS_FILES = [
 export const JS_FILES = [
   "js/config.js", "js/pricing.js", "js/whatsapp.js", "js/main.js", "js/hero.js",
   "js/services.js", "js/quoter.js", "js/booking.js", "js/agenda.js", "js/impact.js",
-  "js/economy.js", "js/qr.js", "js/contact.js", "js/team.js", "js/climate.js",
+  "js/economy.js", "js/payment-story.js", "js/qr.js", "js/contact.js", "js/team.js", "js/climate.js",
   "js/present.js", "js/fx.js",
 ];
 
